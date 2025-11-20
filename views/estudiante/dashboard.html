@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="../../assets/css/student-dashboard.css"/>
+    :root{
+      --p1:#7C3AED; --p2:#22D3EE; --p3:#F59E0B; --p4:#10B981; --bg:#F8FAFF;
+      --ink:#0F172A; --muted:#64748B;
+    }
+    *{font-family:'Fredoka','Inter',system-ui,Segoe UI,Roboto; letter-spacing:.1px}
+    body { background: radial-gradient(1200px 600px at -10% -10%, #E9D5FF 0%, transparent 60%),
+             radial-gradient(1200px 600px at 110% 10%, #CCFBF1 0%, transparent 60%),
+             var(--bg); color: var(--ink);}
+    
+    .clouds::before,.clouds::after{
+      content:""; position:fixed; z-index:-1; opacity:.25; filter: blur(2px);
+      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg"><g fill="%23ffffff"><ellipse cx="60" cy="40" rx="60" ry="28"/><ellipse cx="120" cy="35" rx="50" ry="25"/><ellipse cx="180" cy="42" rx="70" ry="30"/></g></svg>') no-repeat center/contain;
+      width:340px;height:100px; animation: floatcloud 40s linear infinite;
+    }
+    .clouds::before{ top:80px; left:-120px}
+    .clouds::after{ top:220px; right:-120px; animation-duration: 55s}
+    @keyframes floatcloud { from{transform:translateX(0)} to{transform:translateX(140%)} }
+
+    
+    .card { background:#fff; border: 2px solid #EEF2FF; border-radius:24px; box-shadow:0 10px 26px rgba(124,58,237,.08) }
+    .chip { border-radius:999px; padding:.25rem .65rem; font-weight:700 }
+    .btn { border-radius:16px; font-weight:700; padding:.7rem 1rem }
+    .btn-big { border-radius:18px; padding:.9rem 1.2rem; font-size:1rem }
+    .btn-primary { background: linear-gradient(135deg,var(--p1), #4F46E5); color:#fff }
+    .btn-primary:hover{ filter:brightness(1.05) }
+    .btn-soft { background:#F1F5FF; color:#4338CA }
+    .btn-soft:hover{ background:#E5E7FF }
+    .btn-success{ background: linear-gradient(135deg,#22C55E,#16A34A); color:#fff }
+    .btn-danger{ background: linear-gradient(135deg,#EF4444,#DC2626); color:#fff }
+
+    
+    .sidebar-active{ background:linear-gradient(135deg,#A78BFA, #60A5FA); color:#fff !important }
+    .sidebar-link{ border-radius:14px; font-weight:700 }
+
+    
+    .pillbar{ background:#E0E7FF; height:14px; border-radius:999px; overflow:hidden }
+    .pillbar>span{ display:block; height:100%; background:linear-gradient(90deg,#34D399,#10B981); border-radius:999px }
+
+    
+    .sticker{ transform: rotate(-2deg); }
+    .wobble{ animation:wobble 2.2s ease-in-out infinite; transform-origin: center }
+    @keyframes wobble{ 0%,100%{transform:rotate(0)} 50%{transform:rotate(-6deg)}}
+
+    
+    .notif-dot{ animation: ping 1.2s infinite }
+    @keyframes ping {0%{transform:scale(.9);opacity:.9} 70%{transform:scale(1.15);opacity:.3} 100%{transform:scale(.9);opacity:.9}}
+
+    
+    .kids-card{border-radius:22px; border:2px dashed #E9D5FF}
+    .kids-header{background:linear-gradient(90deg,#F0ABFC,#93C5FD); color:#111}
+    .kids-tab{border-radius:999px; background:#F3F4F6; padding:.45rem .8rem; font-weight:700}
+    .kids-tab.active{background:#4F46E5; color:#fff}
+    .kids-cta{border-radius:14px; font-weight:800; color:#fff}
+
+  
+  .course-card{ min-height:220px; display:flex; flex-direction:column; justify-content:space-between }
+  @media(min-width:1024px){ .course-card{ min-height:260px } }
+
+  
+  .att-cal { display:block; width:100%; }
+  .att-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:8px }
+  .att-cell{ aspect-ratio:1/1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; color:#0f172a }
+  .att-cell.present{ background: linear-gradient(135deg,#10B981,#34D399); color:white }
+  .att-cell.absent{ background: linear-gradient(135deg,#F87171,#EF4444); color:white }
+  .att-cell.empty{ background:#F1F5F9; color:#94A3B8 }
+  .att-legend{ display:flex; gap:8px; align-items:center; margin-top:8px }
+  .att-legend .dot{ width:14px; height:14px; border-radius:4px }
+  .att-legend .dot.present{ background:linear-gradient(135deg,#10B981,#34D399) }
+  .att-legend .dot.absent{ background:linear-gradient(135deg,#F87171,#EF4444) }
+  .att-month{ font-weight:700; margin-bottom:6px }
+
+    
+    #confetti-canvas{position:fixed; inset:0; pointer-events:none; z-index:70}
+
+    
+    #toast{ z-index:80; }
+
+    
+    :focus-visible{ outline:3px solid #60A5FA; outline-offset:2px; border-radius:14px }
+    
+    *{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    body{ font-weight:400; color:#0f172a; font-size:15.5px; line-height:1.62; }
+    h1,h2,h3,h4,h5,h6, .text-xl, .text-lg, .font-semibold{ font-weight:600; }
+    strong, b{ font-weight:600; }
+    .kids-title{ font-weight:700; }
+    .navlink, .btn, .book-btn, .kids-btn{ font-weight:600; }
+  
+</head>
+<body class="clouds">
+<canvas id="confetti-canvas"></canvas>
+
+ 
+<header class="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur border-b border-indigo-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+          <i class="fas fa-python text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-slate-800">Plataforma Escolar</h1>
+          <p class="text-xs text-slate-500" id="studentInfo">Cargando...</p>
+        </div>
+      </div>
+    </div>
+      <div class="hidden md:flex items-center gap-3">
+      <div class="relative">
+        <button id="btnNotifications" class="p-2 rounded-lg hover:bg-indigo-50" aria-haspopup="true" aria-label="Notificaciones">
+          <i class="fa-solid fa-bell text-indigo-600"></i>
+          <span id="notifDot" class="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full notif-dot"></span>
+        </button>
+        <div id="panelNotifications" class="hidden absolute right-0 mt-2 w-80 card overflow-hidden">
+          <div class="px-4 py-3 border-b font-bold">Notificaciones</div>
+          <ul id="notifList" class="max-h-72 overflow-auto divide-y"></ul>
+          <div class="px-4 py-2 text-right">
+            <button id="markAllRead" class="text-sm text-indigo-600 hover:underline">Marcar todas como leídas</button>
+          </div>
+        </div>
+      </div>
+      <button id="btnHelp" class="p-2 rounded-lg hover:bg-indigo-50" aria-label="Ayuda"><i class="fa-solid fa-circle-question text-indigo-600"></i></button>
+      <div class="flex items-center gap-2">
+        <div>
+          <p class="text-sm font-semibold text-slate-700" id="headerStudentName">Estudiante</p>
+          <p class="text-xs text-slate-500" id="headerStudentGrade">Grado 6°</p>
+          <p id="attendanceSummary" class="text-xs text-slate-500">Asistencia: --</p>
+        </div>
+        <div class="w-10 h-10 rounded-full grid place-items-center text-white font-bold sticker wobble"
+             style="background:linear-gradient(135deg,#FB7185,#A78BFA)" id="studentAvatar">E</div>
+      </div>
+      <button id="btnLogout" class="p-2 rounded-lg hover:bg-red-50 text-red-600" aria-label="Cerrar sesión" title="Cerrar sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-7xl mx-auto pt-24 flex">
+  
+  <aside class="hidden md:block w-64 fixed top-24 bottom-6 left-4">
+    <nav class="h-full card p-4 overflow-y-auto">
+      <ul id="sideNav" class="space-y-2">
+        <li><a href="#" data-view="dashboard" class="sidebar-link sidebar-active flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-house"></i>Dashboard</a></li>
+        <li><a href="#" data-view="courses" class="sidebar-link flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-book-open"></i>Mis cursos</a></li>
+        <li><a href="#" data-view="live" class="sidebar-link flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-video"></i>Clase en vivo <span class="ml-auto chip bg-rose-100 text-rose-700 text-xs">Hoy</span></a></li>
+        <li><a href="#" data-view="tasks" class="sidebar-link flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-list-check"></i>Tareas <span id="badgeTasks" class="ml-auto chip bg-amber-100 text-amber-700 text-xs">3</span></a></li>
+        <li><a href="#" data-view="grades" class="sidebar-link flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-chart-column"></i>Calificaciones</a></li>
+        <li><a href="#" data-view="chat" class="sidebar-link flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-comments"></i>Chat con Docente</a></li>
+        <li><a href="#" data-view="playground" class="sidebar-link flex items-center gap-3 px-3 py-3"><i class="fa-solid fa-terminal"></i>Ejecutar Python</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  
+  <main id="main" class="flex-1 md:ml-72 px-4 sm:px-6 space-y-8 pb-16">
+
+    
+    <section data-view-id="dashboard" class="view">
+      <div class="card p-6 sm:p-8 relative overflow-hidden">
+        <img alt="" aria-hidden="true" class="absolute -right-6 -top-6 w-28 opacity-20 rotate-12"
+             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' viewBox='0 0 200 200'><circle cx='60' cy='60' r='40' fill='%23FFE4E6'/><circle cx='120' cy='80' r='34' fill='%23E9D5FF'/><circle cx='110' cy='40' r='24' fill='%23CCFBF1'/></svg>">
+        <div class="flex items-start justify-between gap-6">
+          <div>
+            <h2 class="text-3xl font-extrabold">¡Hola, María! <span class="text-amber-500">🍪</span></h2>
+            <p class="text-sm text-slate-600">Hoy aprenderemos más de <b>POO</b>. ¡Tú puedes! 💪</p>
+            <div class="mt-4 flex items-center gap-3 text-sm">
+              
+              <span class="chip bg-emerald-100 text-emerald-700"><i class="fa-solid fa-clock mr-1"></i><span id="hoursCompleted">32</span> h</span>
+            </div>
+          </div>
+          <div class="text-right hidden sm:block">
+            <div class="text-4xl font-extrabold text-indigo-700"><span id="progressPct">68</span>%</div>
+            <p class="text-xs text-slate-500">Progreso total</p>
+          </div>
+        </div>
+        <div class="mt-6">
+          <div class="flex justify-between text-sm mb-1"><span>Meta semanal</span><span><span id="progressPctInline">68</span>% completado</span></div>
+          <div class="pillbar"><span id="progressBar" style="width:68%"></span></div>
+        </div>
+      </div>
+
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <div><p class="text-sm text-slate-500">Lecciones</p><p class="text-2xl font-extrabold"><span id="lessonsDone">24</span>/35</p></div>
+            <div class="w-12 h-12 rounded-2xl grid place-items-center text-white" style="background:linear-gradient(135deg,#60A5FA,#818CF8)"><i class="fa-solid fa-play"></i></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <div><p class="text-sm text-slate-500">Tareas</p><p class="text-2xl font-extrabold"><span id="tasksDone">8</span>/12</p></div>
+            <div class="w-12 h-12 rounded-2xl grid place-items-center text-white" style="background:linear-gradient(135deg,#F59E0B,#FB923C)"><i class="fa-solid fa-list-check"></i></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <div><p class="text-sm text-slate-500">Promedio</p><p class="text-2xl font-extrabold" id="avgScore">4.2/5.0</p></div>
+            <div class="w-12 h-12 rounded-2xl grid place-items-center text-white" style="background:linear-gradient(135deg,#34D399,#10B981)"><i class="fa-solid fa-star"></i></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <div><p class="text-sm text-slate-500">Insignias</p><p class="text-2xl font-extrabold" id="badgesCount">7</p></div>
+            <div class="w-12 h-12 rounded-2xl grid place-items-center text-white" style="background:linear-gradient(135deg,#F472B6,#A78BFA)"><i class="fa-solid fa-trophy"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 space-y-6">
+          
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-extrabold">Próxima clase</h3>
+              <span id="livePill" class="hidden chip bg-rose-100 text-rose-700">EN VIVO</span>
+            </div>
+            <div class="rounded-2xl p-5 border-2 border-indigo-100 bg-gradient-to-r from-indigo-50 to-sky-50">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                  <h4 class="text-lg font-extrabold" id="classTitle">POO · Herencia</h4>
+                  <p class="text-sm text-slate-600 flex items-center gap-2 mt-1"><i class="fa-solid fa-calendar-day text-indigo-600"></i><span id="classDateLabel">—</span></p>
+                  <p class="text-sm text-slate-600 flex items-center gap-2"><i class="fa-solid fa-clock text-indigo-600"></i><span id="classTimeLabel">—</span></p>
+                  <p class="text-sm text-slate-600 flex items-center gap-2"><i class="fa-solid fa-video text-indigo-600"></i><span id="classProvider">Google Meet</span></p>
+                </div>
+                <div class="text-right min-w-[110px]">
+                  <div id="countdown" class="text-3xl font-extrabold text-rose-600">—</div>
+                  <p class="text-xs text-slate-500">para comenzar</p>
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-3">
+                <button id="btnJoin" class="btn btn-big btn-danger disabled:opacity-60"><i class="fa-solid fa-video mr-2"></i>Entrar a la clase</button>
+                <button id="btnAddCalendar" class="btn btn-soft" title="Agregar a mi calendario"><i class="fa-solid fa-calendar-plus"></i></button>
+                <button id="btnAVTest" class="btn btn-soft" aria-label="Probar audio y video"><i class="fa-solid fa-headset mr-2"></i>Probar A/V</button>
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="card p-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-extrabold">Tareas pendientes</h3>
+              <button class="text-indigo-600 font-bold" data-action="goTasks">Ver todas</button>
+            </div>
+            <div class="mt-3 grid place-items-center">
+              <div class="kids-card w-full max-w-[460px]" id="kidsCard" aria-live="polite">
+                <div class="kids-header flex items-center justify-between px-4 py-3">
+                  <div>
+                    <div class="font-extrabold flex items-center gap-2"><span id="kidsKindIcon">📘</span><span id="kidsTitle">—</span></div>
+                    <div class="text-sm opacity-90" id="kidsDue">—</div>
+                  </div>
+                  <button id="kidsRead" class="btn btn-soft" aria-label="Leer tarea en voz alta"><i class="fa-solid fa-volume-high"></i></button>
+                </div>
+                <div class="px-3 py-2 flex gap-2">
+                  <button class="kids-tab active" id="tabResumen" aria-label="Ver resumen">Resumen</button>
+                  <button class="kids-tab" id="tabHacer" aria-label="Ver qué hacer">¿Qué hago?</button>
+                </div>
+                <div class="px-4 py-4 text-slate-700" id="kidsBody"></div>
+                <div class="px-4 py-3 bg-indigo-50/40 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <button class="btn btn-soft" id="prevTask" title="Anterior" aria-label="Tarea anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div id="kidsDots" class="flex gap-1"></div>
+                    <button class="btn btn-soft" id="nextTask" title="Siguiente" aria-label="Siguiente tarea"><i class="fa-solid fa-chevron-right"></i></button>
+                  </div>
+                  <button id="kidsCTA" class="kids-cta btn-primary px-4"><i class="fa-solid fa-play mr-1"></i><span>—</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="space-y-6">
+          <div class="card p-6">
+            <h3 class="text-xl font-extrabold mb-3">Actividad reciente</h3>
+            <ul id="recentList" class="space-y-3"></ul>
+          </div>
+          <div class="card p-6">
+            <h3 class="text-xl font-extrabold mb-3">Atajos</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <button data-view="grades" class="btn btn-primary"><i class="fa-solid fa-chart-line mr-2"></i>Calificaciones</button>
+              
+              <button data-view="chat" class="btn btn-soft"><i class="fa-solid fa-comments mr-2"></i>Chat</button>
+            </div>
+          </div>
+          <div class="card p-6">
+            <h3 class="text-xl font-extrabold mb-3">Ruta de aprendizaje</h3>
+            <div id="pathList" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section data-view-id="courses" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Mis cursos</h2>
+      <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <section data-view-id="live" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Clase en vivo</h2>
+
+      
+      <div class="card p-6 mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xl font-extrabold">Próxima clase</h3>
+          <span id="livePillLive" class="hidden chip bg-rose-100 text-rose-700">EN VIVO</span>
+        </div>
+        <div class="rounded-2xl p-5 border-2 border-indigo-100 bg-gradient-to-r from-indigo-50 to-sky-50">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <h4 class="text-lg font-extrabold" id="liveTitle">—</h4>
+              <p class="text-sm text-slate-600 flex items-center gap-2 mt-1">
+                <i class="fa-solid fa-calendar-day text-indigo-600"></i><span id="liveDateLabel">—</span>
+              </p>
+              <p class="text-sm text-slate-600 flex items-center gap-2">
+                <i class="fa-solid fa-clock text-indigo-600"></i><span id="liveTimeLabel">—</span>
+              </p>
+              <p class="text-sm text-slate-600 flex items-center gap-2">
+                <i class="fa-solid fa-video text-indigo-600"></i><span id="liveProvider">—</span>
+              </p>
+            </div>
+            <div class="text-right min-w-[110px]">
+              <div id="liveCountdown" class="text-3xl font-extrabold text-rose-600">—</div>
+              <p class="text-xs text-slate-500">para comenzar</p>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button id="liveJoin" class="btn btn-danger disabled:opacity-60">
+              <i class="fa-solid fa-video mr-2"></i>Entrar ahora
+            </button>
+            <button id="liveAV" class="btn btn-soft">Probar A/V</button>
+            <button id="liveICS" class="btn btn-soft" title="Agregar a calendario"><i class="fa-solid fa-calendar-plus"></i></button>
+          </div>
+          <p id="liveState" class="text-sm text-slate-500 mt-3">El botón “Entrar” se habilita 10 min antes.</p>
+        </div>
+      </div>
+
+      
+      <div class="card p-6">
+        <h3 class="text-xl font-extrabold mb-3">Próximas clases</h3>
+        <ul id="liveList" class="space-y-3"></ul>
+      </div>
+    </section>
+
+    
+    <section data-view-id="tasks" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Tareas</h2>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <button class="btn btn-soft" data-filter="all">Todas</button>
+        <button class="btn btn-soft" data-filter="pendiente">Pendientes</button>
+        <button class="btn btn-soft" data-filter="enviado">Enviadas</button>
+      </div>
+      <div id="tasksTable" class="card overflow-hidden"></div>
+    </section>
+
+    
+    <section data-view-id="grades" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Calificaciones</h2>
+      <div id="gradesPanel" class="space-y-4"></div>
+    </section>
+
+    
+    <section data-view-id="chat" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Mensajes</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <aside class="md:col-span-1 card"><ul id="chatList" class="divide-y"></ul></aside>
+        <div class="md:col-span-2 card flex flex-col h-[440px]">
+          <header class="px-4 py-3 border-b font-extrabold" id="chatHeader">Chat con Asesor</header>
+          <div id="chatThread" class="flex-1 p-4 overflow-auto space-y-3"></div>
+          <form id="chatForm" class="p-3 border-t flex gap-2">
+            <button type="button" id="btnAttach" class="btn btn-soft" title="Adjuntar" aria-label="Adjuntar archivo"><i class="fa-solid fa-paperclip"></i></button>
+            <textarea id="chatInput" rows="1" class="flex-1 resize-none rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Escribe un mensaje... (Shift+Enter salto de línea)"></textarea>
+            <button class="btn btn-primary"><i class="fa-solid fa-paper-plane mr-1"></i>Enviar</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    
+    <section data-view-id="profile" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Mi perfil</h2>
+      <form id="profileForm" class="card p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="text-sm">Nombre<input class="mt-1 border rounded-xl px-3 py-2 w-full" value="María"/></label>
+        <label class="text-sm">Apellido<input class="mt-1 border rounded-xl px-3 py-2 w-full" value="González"/></label>
+        <label class="text-sm md:col-span-2">Correo<input class="mt-1 border rounded-xl px-3 py-2 w-full" value="maria@escuela.edu.co"/></label>
+        <label class="text-sm">Zona horaria<select class="mt-1 border rounded-xl px-3 py-2 w-full"><option selected>America/Bogota</option></select></label>
+        <label class="text-sm">Idioma<select class="mt-1 border rounded-xl px-3 py-2 w-full"><option selected>Español (CO)</option></select></label>
+        <div class="md:col-span-2 text-right">
+          <button id="saveProfile" type="button" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </form>
+    </section>
+
+    
+    <section data-view-id="playground" class="view hidden">
+      <h2 class="text-2xl font-extrabold mb-4">Ejecutar Python</h2>
+      <div class="card p-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-bold">Código Python</label>
+            <textarea id="pyCode" rows="12" class="mt-2 w-full border rounded-xl px-3 py-2 font-mono text-sm" placeholder="print('Hola desde Pyodide')">print('Hello World')</textarea>
+            <div class="flex items-center gap-2 mt-3">
+              <button id="btnRunPy" class="btn btn-primary">Ejecutar</button>
+              <button id="btnStopPy" class="btn btn-soft">Detener</button>
+              <span id="pyStatus" class="text-sm text-slate-500">Pyodide: no cargado</span>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-bold">Salida</label>
+            <pre id="pyOut" class="mt-2 p-3 bg-black text-white rounded-xl h-[260px] overflow-auto text-sm"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+ 
+<dialog id="modalAV" class="rounded-2xl p-0 w-[560px] max-w-[92vw]">
+  <form method="dialog" class="bg-white rounded-2xl">
+    <header class="px-5 py-4 border-b font-extrabold">Prueba de audio / video</header>
+    <div class="p-5 space-y-3 text-sm">
+      <p>Simulación de prueba A/V. Selecciona dispositivos y reproduce un sonido.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="text-sm">Micrófono<select class="mt-1 w-full border rounded-xl px-2 py-1"><option>Micrófono (Default)</option><option>USB Mic</option></select></label>
+        <label class="text-sm">Cámara<select class="mt-1 w-full border rounded-xl px-2 py-1"><option>HD Cam</option><option>Virtual Cam</option></select></label>
+      </div>
+      <button id="btnPlayTone" type="button" class="btn btn-soft">Reproducir tono</button>
+    </div>
+    <footer class="px-5 py-3 border-t flex justify-end gap-2">
+      <button class="btn btn-soft">Cerrar</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="modalTask" class="rounded-2xl p-0 w-[680px] max-w-[94vw]">
+  <form method="dialog" class="bg-white rounded-2xl">
+    <header class="px-5 py-4 border-b font-extrabold" id="taskTitle">Tarea</header>
+    <div class="p-5 space-y-3 text-sm">
+      <p id="taskDesc" class="text-slate-700">—</p>
+      <div class="space-y-2">
+        <label class="block text-sm font-bold">Adjunta archivos (.py, .zip, .pdf)</label>
+        <input id="taskFiles" type="file" multiple class="w-full border rounded-xl px-3 py-2" accept=".py,.zip,.pdf"/>
+      </div>
+      <div class="space-y-2">
+        <label class="block text-sm font-bold">Repositorio (opcional)</label>
+        <input id="taskRepo" type="url" placeholder="https://github.com/usuario/proyecto" class="w-full border rounded-xl px-3 py-2"/>
+      </div>
+      <label class="inline-flex items-center gap-2 text-sm"><input id="taskAuth" type="checkbox" class="accent-indigo-600"/> <span>Declaro autoría de mi entrega</span></label>
+    </div>
+    <footer class="px-5 py-3 border-t flex justify-between">
+      <button class="btn btn-soft">Cancelar</button>
+      <button id="btnSubmitTask" type="button" class="btn btn-primary">Entregar</button>
+    </footer>
+  </form>
+</dialog>
+
+ 
+<div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg translate-y-8 opacity-0 pointer-events-none transition-all duration-300"></div>
+
+<audio id="tone" preload="auto"><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=" type="audio/wav"></audio>
+<audio id="sfxWin" preload="auto"><source src="data:audio/wav;base64,UklGRoQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAQAAAA" type="audio/wav"></audio>
+
+<script>
+ 
+ 
+let currentUser = null;
+try {
+  const userData = localStorage.getItem('currentUser');
+  if (userData) {
+    currentUser = JSON.parse(userData);
+  }
+} catch (e) {
+  console.error('Error al leer datos del usuario:', e);
+}
+
+ 
+if (!currentUser) {
+  window.location.href = '../../index.html';
+  throw new Error('No hay usuario logueado');
+}
+
+if (currentUser.role === 'teacher') {
+  window.location.href = '../docente/dashboard.html';
+  throw new Error('Los docentes deben usar su panel');
+}
+
+ 
+const urlParams = new URLSearchParams(window.location.search);
+const gradeFromURL = parseInt(urlParams.get('grade'));
+const studentGrade = gradeFromURL || currentUser.grade || 6;
+
+ 
+const gradeConfig = {
+  6: {
+    name: 'Sexto Grado',
+    level: 'Iniciación',
+    periodTitles: {
+      p1: 'Período 1: Mis Primeros Pasos en Python',
+      p2: 'Período 2: Estructuras y Organización',
+      p3: 'Período 3: Proyectos Divertidos',
+      p4: 'Período 4: Mi Primer Gran Proyecto'
+    },
+    periodTopics: {
+      p1: ['Variables y tipos', 'Entrada/salida', 'Decisiones if/else', 'Bucles while/for', 'Listas básicas', 'Funciones simples', 'Proyecto: Mi Calculadora'],
+      p2: ['Listas avanzadas', 'Tuplas', 'Diccionarios', 'Métodos de strings', 'Archivos de texto', 'Depuración', 'Proyecto: Libreta de Contactos'],
+      p3: ['Módulos random/time', 'Juegos simples', 'Turtle graphics', 'Animaciones', 'Sonidos', 'Proyecto: Juego de Adivinanzas'],
+      p4: ['Repaso completo', 'Planificación', 'Diseño de juego', 'Implementación', 'Testing', 'Presentación', 'Proyecto Final: Mi Videojuego']
+    },
+    weekTopics: [
+      'Introducción a Python',
+      'Operaciones Básicas',
+      'Decisiones Simples',
+      'Repeticiones',
+      'Listas - Primera Parte',
+      'Funciones Básicas',
+      'Strings Avanzados',
+      'Diccionarios Simples',
+      'Preparación del Proyecto',
+      'Proyecto Final'
+    ]
+  },
+  7: {
+    name: 'Séptimo Grado',
+    level: 'Intermedio',
+    periodTitles: {
+      p1: 'Período 1: Fundamentos Sólidos',
+      p2: 'Período 2: Programación Orientada a Objetos',
+      p3: 'Período 3: Datos y Archivos',
+      p4: 'Período 4: Aplicación Web Básica'
+    },
+    periodTopics: {
+      p1: ['Repaso rápido', 'Funciones avanzadas', 'Lambda y map', 'Comprehensions', 'Manejo de errores', 'Módulos propios', 'Proyecto: Biblioteca de Funciones'],
+      p2: ['Clases y objetos', 'Atributos y métodos', 'Herencia', 'Polimorfismo', 'Encapsulación', 'Métodos especiales', 'Proyecto: Sistema de Inventario'],
+      p3: ['Archivos CSV', 'JSON', 'Manejo de excepciones', 'Lectura/escritura', 'Persistencia de datos', 'Validación', 'Proyecto: Gestor de Tareas'],
+      p4: ['HTML básico', 'Flask intro', 'Rutas y templates', 'Formularios', 'Base de datos SQLite', 'Deploy local', 'Proyecto: Mi Blog Personal']
+    },
+    weekTopics: [
+      'Repaso y Funciones Avanzadas',
+      'Programación Funcional',
+      'Introducción a OOP',
+      'Clases y Objetos Prácticos',
+      'Herencia y Polimorfismo',
+      'Archivos y Persistencia',
+      'JSON y APIs',
+      'Manejo de Errores',
+      'Integración de Conceptos',
+      'Proyecto Integrador'
+    ]
+  },
+  8: {
+    name: 'Octavo Grado',
+    level: 'Avanzado',
+    periodTitles: {
+      p1: 'Período 1: Algoritmos y Estructuras',
+      p2: 'Período 2: Análisis de Datos',
+      p3: 'Período 3: Desarrollo Web',
+      p4: 'Período 4: Proyecto Profesional'
+    },
+    periodTopics: {
+      p1: ['Complejidad algorítmica', 'Algoritmos de búsqueda', 'Algoritmos de ordenamiento', 'Recursividad', 'Pilas y colas', 'Grafos básicos', 'Proyecto: Simulador de Algoritmos'],
+      p2: ['NumPy arrays', 'Pandas DataFrames', 'Limpieza de datos', 'Análisis estadístico', 'Matplotlib', 'Seaborn', 'Proyecto: Análisis de Dataset Real'],
+      p3: ['Flask avanzado', 'APIs REST', 'Autenticación', 'Base de datos relacional', 'Frontend con Bootstrap', 'Testing', 'Proyecto: Red Social Escolar'],
+      p4: ['Metodología ágil', 'Git y GitHub', 'Documentación técnica', 'Testing automatizado', 'Deployment', 'Presentación profesional', 'Proyecto: Aplicación Completa']
+    },
+    weekTopics: [
+      'Complejidad y Big O',
+      'Búsqueda y Ordenamiento',
+      'Recursividad Avanzada',
+      'Estructuras de Datos',
+      'Algoritmos en Grafos',
+      'Programación Dinámica',
+      'Backtracking',
+      'Greedy Algorithms',
+      'Preparación Proyecto',
+      'Proyecto Final Avanzado'
+    ]
+  }
+};
+
+const state = {
+  
+  student: {
+    name: currentUser.name || 'Estudiante',
+    grade: studentGrade,
+    gradeName: gradeConfig[studentGrade].name,
+    level: gradeConfig[studentGrade].level,
+    period: 1,
+    currentWeek: 2
+  },
+  
+  
+  calendar: {
+    period: 1,
+    startDate: '2025-01-13',
+    endDate: '2025-03-21',
+    weeks: gradeConfig[studentGrade].weekTopics.map((topic, idx) => ({
+      num: idx + 1,
+      dates: ['Ene 13-17', 'Ene 20-24', 'Ene 27-31', 'Feb 3-7', 'Feb 10-14', 
+              'Feb 17-21', 'Feb 24-28', 'Mar 3-7', 'Mar 10-14', 'Mar 17-21'][idx],
+      topic: topic
+    }))
+  },
+  
+  class: { start:new Date(Date.now()+5*60*1000), end:new Date(Date.now()+50*60*1000), meetUrl:'https://meet.google.com/abc-defg-hij', title:'Lección 1.2: Variables - Las Cajas Mágicas', provider:'Google Meet' },
+  
+  courses:[
+    {
+      id:'p1',
+      title: gradeConfig[studentGrade].periodTitles.p1,
+      subtitle:'Ene 13 - Mar 21, 2025',
+      progress:25,
+      hours:8,
+      totalHours:40,
+      weeks:10,
+      lang:'python',
+      desc: `Período 1 - ${gradeConfig[studentGrade].name} (${gradeConfig[studentGrade].age})`,
+      unlocked:true,
+      current:true,
+      topics: gradeConfig[studentGrade].periodTopics.p1
+    },
+    {
+      id:'p2',
+      title: gradeConfig[studentGrade].periodTitles.p2,
+      subtitle:'Mar 31 - Jun 6, 2025',
+      progress:0,
+      hours:0,
+      totalHours:40,
+      weeks:10,
+      lang:'python',
+      desc: `Período 2 - ${gradeConfig[studentGrade].name}`,
+      unlocked:false,
+      current:false,
+      topics: gradeConfig[studentGrade].periodTopics.p2
+    },
+    {
+      id:'p3',
+      title: gradeConfig[studentGrade].periodTitles.p3,
+      subtitle:'Jun 16 - Ago 22, 2025',
+      progress:0,
+      hours:0,
+      totalHours:40,
+      weeks:10,
+      lang:'python',
+      desc: `Período 3 - ${gradeConfig[studentGrade].name}`,
+      unlocked:false,
+      current:false,
+      topics: gradeConfig[studentGrade].periodTopics.p3
+    },
+    {
+      id:'p4',
+      title: gradeConfig[studentGrade].periodTitles.p4,
+      subtitle:'Sep 1 - Nov 7, 2025',
+      progress:0,
+      hours:0,
+      totalHours:40,
+      weeks:10,
+      lang:'python',
+      desc: `Período 4 - ${gradeConfig[studentGrade].name}`,
+      unlocked:false,
+      current:false,
+      topics: gradeConfig[studentGrade].periodTopics.p4
+    }
+  ],
+  modules:[
+    
+    {
+      id:'w1',
+      title:'Semana 1: Introducción',
+      dates:'Ene 13-17, 2025',
+      description:'Primeros pasos con Python: print() y variables',
+      hours:'4h',
+      unlocked:true,
+      completed:true,
+      progress:100,
+      weekNum:1,
+      lessons:[
+        {id:'l1',title:'Mar 14 Ene • Lección 1.1: ¡Hola Python!',type:'video',duration:'2h',date:'2025-01-14',completed:true},
+        {id:'l2',title:'Jue 16 Ene • Lección 1.2: Variables - Las Cajas Mágicas',type:'video',duration:'2h',date:'2025-01-16',completed:true},
+        {id:'t1',title:'📝 Tarea 1: Mi Tarjeta de Presentación',type:'assignment',duration:'Entrega: Dom 19 Ene',date:'2025-01-19',completed:true}
+      ]
+    },
+    
+    
+    {
+      id:'w2',
+      title:'Semana 2: Operaciones Básicas',
+      dates:'Ene 20-24, 2025',
+      description:'Calculadora mágica y entrada de datos con input()',
+      hours:'4h',
+      unlocked:true,
+      current:true,
+      completed:false,
+      progress:50,
+      weekNum:2,
+      lessons:[
+        {id:'l3',title:'Mar 21 Ene • Lección 1.3: La Calculadora Mágica',type:'video',duration:'2h',date:'2025-01-21',completed:true},
+        {id:'l4',title:'Jue 23 Ene • Lección 1.4: Pidiendo Información - input()',type:'video',duration:'2h',date:'2025-01-23',completed:false},
+        {id:'t2',title:'📝 Tarea 2: Calculadora de Compras',type:'assignment',duration:'Entrega: Dom 26 Ene',date:'2025-01-26',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w3',
+      title:'Semana 3: Decisiones Simples',
+      dates:'Ene 27-31, 2025',
+      description:'Aprende a tomar decisiones con if/else/elif',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:3,
+      lessons:[
+        {id:'l5',title:'Mar 28 Ene • Lección 2.1: El Camino Se Divide - if/else',type:'video',duration:'2h',date:'2025-01-28',completed:false},
+        {id:'l6',title:'Jue 30 Ene • Lección 2.2: Múltiples Caminos - elif',type:'video',duration:'2h',date:'2025-01-30',completed:false},
+        {id:'t3',title:'📝 Tarea 3: Adivina el Número',type:'assignment',duration:'Entrega: Dom 2 Feb',date:'2025-02-02',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w4',
+      title:'Semana 4: Repeticiones',
+      dates:'Feb 3-7, 2025',
+      description:'Bucles while y for para repetir acciones',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:4,
+      lessons:[
+        {id:'l7',title:'Mar 4 Feb • Lección 2.3: Haciendo Loops - while',type:'video',duration:'2h',date:'2025-02-04',completed:false},
+        {id:'l8',title:'Jue 6 Feb • Lección 2.4: El Bucle for',type:'video',duration:'2h',date:'2025-02-06',completed:false},
+        {id:'t4',title:'📝 Tarea 4: Menú de Juegos',type:'assignment',duration:'Entrega: Dom 9 Feb',date:'2025-02-09',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w5',
+      title:'Semana 5: Listas - Primera Parte',
+      dates:'Feb 10-14, 2025',
+      description:'Guardando muchos datos juntos con listas',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:5,
+      lessons:[
+        {id:'l9',title:'Mar 11 Feb • Lección 3.1: Listas - Muchos Datos',type:'video',duration:'2h',date:'2025-02-11',completed:false},
+        {id:'l10',title:'Jue 13 Feb • Lección 3.2: Recorriendo Listas',type:'video',duration:'2h',date:'2025-02-13',completed:false},
+        {id:'q1',title:'🧪 Quiz 1: Estructuras Básicas (10 preguntas)',type:'quiz',duration:'30 min',date:'2025-02-13',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w6',
+      title:'Semana 6: Funciones Básicas',
+      dates:'Feb 17-21, 2025',
+      description:'Crea bloques de código reutilizables',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:6,
+      lessons:[
+        {id:'l11',title:'Mar 18 Feb • Lección 4.1: Funciones - Bloques Reutilizables',type:'video',duration:'2h',date:'2025-02-18',completed:false},
+        {id:'l12',title:'Jue 20 Feb • Lección 4.2: Funciones con Parámetros',type:'video',duration:'2h',date:'2025-02-20',completed:false},
+        {id:'t5',title:'📝 Tarea 5: Conversor de Unidades',type:'assignment',duration:'Entrega: Dom 23 Feb',date:'2025-02-23',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w7',
+      title:'Semana 7: Strings Avanzados',
+      dates:'Feb 24-28, 2025',
+      description:'Manipulación y validación de textos',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:7,
+      lessons:[
+        {id:'l13',title:'Mar 25 Feb • Lección 4.3: Jugando con Textos',type:'video',duration:'2h',date:'2025-02-25',completed:false},
+        {id:'l14',title:'Jue 27 Feb • Lección 4.4: Validaciones Simples',type:'video',duration:'2h',date:'2025-02-27',completed:false},
+        {id:'t6',title:'📝 Tarea 6: Analizador de Palabras',type:'assignment',duration:'Entrega: Dom 2 Mar',date:'2025-03-02',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w8',
+      title:'Semana 8: Diccionarios Simples',
+      dates:'Mar 3-7, 2025',
+      description:'Datos organizados con etiquetas (clave-valor)',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:8,
+      lessons:[
+        {id:'l15',title:'Mar 4 Mar • Lección 5.1: Diccionarios - Datos con Etiquetas',type:'video',duration:'2h',date:'2025-03-04',completed:false},
+        {id:'l16',title:'Jue 6 Mar • Lección 5.2: Recorriendo Diccionarios',type:'video',duration:'2h',date:'2025-03-06',completed:false},
+        {id:'q2',title:'🧪 Quiz 2: Estructuras de Datos (10 preguntas)',type:'quiz',duration:'30 min',date:'2025-03-06',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w9',
+      title:'Semana 9: Preparación del Proyecto',
+      dates:'Mar 10-14, 2025',
+      description:'Diseña y planifica tu proyecto final',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:9,
+      lessons:[
+        {id:'l17',title:'Mar 11 Mar • Lección 6.1: Diseño del Proyecto',type:'video',duration:'2h',date:'2025-03-11',completed:false},
+        {id:'l18',title:'Jue 13 Mar • Clase de Asesoría',type:'live',duration:'2h',date:'2025-03-13',completed:false}
+      ]
+    },
+    
+    
+    {
+      id:'w10',
+      title:'Semana 10: Proyecto Final',
+      dates:'Mar 17-21, 2025',
+      description:'Crea y presenta tu Agenda Personal en Python',
+      hours:'4h',
+      unlocked:false,
+      completed:false,
+      progress:0,
+      weekNum:10,
+      type:'project',
+      lessons:[
+        {id:'l19',title:'Mar 18 Mar • Clase de Asesoría',type:'live',duration:'2h',date:'2025-03-18',completed:false},
+        {id:'l20',title:'Jue 20 Mar • Presentación de Proyectos',type:'live',duration:'2h',date:'2025-03-20',completed:false},
+        {id:'pf',title:'🎯 Proyecto Final: Mi Agenda Personal',type:'project',duration:'Entrega: Vie 21 Mar',date:'2025-03-21',completed:false}
+      ]
+    }
+  ],
+  tasks:[
+    {id:'t1',kind:'PRÁCTICA',dueIn:'5 días',title:'Tarea 1: Programa de Cálculos Básicos',desc:'Crear programa que solicite dos números y realice 4 operaciones básicas.',status:'enviado'},
+    {id:'t2',kind:'PRÁCTICA',dueIn:'1 semana',title:'Tarea 2: Menú Interactivo',desc:'Programa con menú de 4 opciones con validación de entrada.',status:'pendiente'},
+    {id:'t3',kind:'QUIZ',dueIn:'1 semana',title:'Quiz 1: Estructuras de Control',desc:'15 preguntas + 3 ejercicios de código.',status:'pendiente'}
+  ],
+  grades:{scale:'0-5',items:[
+    {id:'g1',name:'Tarea 1: Cálculos Básicos',weight:10,grade:4.8,published:true},
+    {id:'g2',name:'Tarea 2: Menú Interactivo',weight:15,grade:null,published:false},
+    {id:'g3',name:'Quiz 1: Estructuras de Control',weight:15,grade:null,published:false},
+    {id:'g4',name:'Tarea 3: Biblioteca de Funciones',weight:15,grade:null,published:false},
+    {id:'g5',name:'Tarea 4: Sistema de Estudiantes',weight:20,grade:null,published:false},
+    {id:'g6',name:'Quiz 2: Funciones y Estructuras',weight:15,grade:null,published:false},
+    {id:'g7',name:'Proyecto Final: Sistema Biblioteca',weight:30,grade:null,published:false}
+  ]},
+  recent:[
+    {icon:'check',tone:'emerald',title:'Lección completada',text:'Operadores Lógicos',when:'Hace 1 h'},
+    {icon:'star',tone:'amber',title:'Tarea calificada',text:'Cálculos Básicos · 4.8/5',when:'Hace 3 h'},
+    {icon:'trophy',tone:'fuchsia',title:'Insignia desbloqueada',text:'Primera Tarea Completada',when:'Hace 5 h'},
+    {icon:'check',tone:'emerald',title:'Módulo finalizado',text:'Introducción a Python',when:'Ayer'}
+  ],
+  path:[
+    {name:'Módulo 1: Introducción',color:'emerald',pct:100},
+    {name:'Módulo 2: Estructuras Control',color:'indigo',pct:33},
+    {name:'Módulo 3: Funciones',color:'slate',pct:0},
+    {name:'Módulo 4: Estructuras Datos',color:'slate',pct:0},
+    {name:'Módulo 5: Proyecto Final',color:'slate',pct:0}
+  ],
+  notifications:[
+    {id:'n1',text:'Nueva clase: Condicionales - Lunes 10:00 AM',read:false},
+    {id:'n2',text:'Tarea 1 calificada: 4.8/5.0 🎉',read:false},
+    {id:'n3',text:'Tarea 2 vence en 1 semana',read:false}
+  ],
+  calendar:[],
+  attendance: (()=>{
+    const now = new Date();
+    const year = now.getFullYear(), month = now.getMonth();
+    const days = new Date(year, month+1, 0).getDate();
+    const out = {};
+    for(let d=1; d<=days; d++){
+      const iso = new Date(year, month, d).toISOString().slice(0,10);
+      const dow = new Date(year, month, d).getDay();
+      const r = Math.random();
+      if(dow===0 || dow===6) out[iso] = (r>0.6 ? 'present' : 'absent');
+      else out[iso] = (r>0.25 ? 'present' : 'absent');
+    }
+    return out;
+  })(),
+  attendanceView: (function(){ const n=new Date(); return { year:n.getFullYear(), month:n.getMonth() } })(),
+  liveClasses: (() => {
+    const now = Date.now();
+    const mk = (days, title, dur=45) => {
+      const start = new Date(now + days*24*60*60*1000 + 17*60*60*1000);
+      const end   = new Date(start.getTime() + dur*60*1000);
+      return { id: crypto.randomUUID(), title, start, end, provider:'Google Meet', meetUrl:'https://meet.google.com/abc-defg-hij' };
+    };
+    return [
+      mk(0,  'Lección 2.1: Condicionales'),
+      mk(2,  'Lección 2.2: Ciclo while'),
+      mk(5,  'Lección 2.3: Ciclo for'),
+      mk(7,  'Repaso Módulo 2'),
+      mk(9,  'Lección 3.1: Funciones')
+    ];
+  })(),
+};
+
+ 
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const fmt2=n=>n.toString().padStart(2,'0');
+function toast(msg,type='default'){
+  const el=$('#toast'); el.textContent=msg;
+  el.className='fixed bottom-4 right-4 px-4 py-3 rounded-xl shadow-lg translate-y-0 opacity-100 transition-all duration-300 '+(type==='ok'?'bg-emerald-600 text-white':type==='err'?'bg-rose-600 text-white':'bg-slate-900 text-white');
+  setTimeout(()=>{el.classList.add('opacity-0','translate-y-8')},2300)
+}
+function fmtRange(start, end){
+  const opts = { hour:'2-digit', minute:'2-digit' };
+  return `${start.toLocaleTimeString('es-CO',opts)} – ${end.toLocaleTimeString('es-CO',opts)} (GMT-5)`;
+}
+function nextJoinableIndex(){
+  const now = Date.now();
+  return state.liveClasses.findIndex(c => c.end.getTime() > now);
+}
+function renderLive(){
+  const i = nextJoinableIndex() >= 0 ? nextJoinableIndex() : 0;
+  const cls = state.liveClasses[i];
+  if(!cls) return;
+
+  
+  $('#liveTitle').textContent = cls.title;
+  $('#liveProvider').textContent = cls.provider;
+  $('#liveDateLabel').textContent = cls.start.toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  $('#liveTimeLabel').textContent = fmtRange(cls.start, cls.end);
+
+  
+  function tickLive(){
+    const now = Date.now(), start=cls.start.getTime(), end=cls.end.getTime();
+    let label='—', join=false;
+    if(now<start){ const diff=start-now, m=Math.floor(diff/60000), s=Math.floor((diff%60000)/1000); label=`${fmt2(m)}:${fmt2(s)}`; join=(diff<=10*60*1000); $('#livePillLive').classList.add('hidden'); }
+    else if(now<=end){ label='En curso'; join=true; $('#livePillLive').classList.remove('hidden'); }
+    else { label='Finalizada'; join=false; $('#livePillLive').classList.add('hidden'); }
+    $('#liveCountdown').textContent = label;
+    const btn=$('#liveJoin'); btn.disabled=!join; btn.setAttribute('aria-disabled', String(!join));
+  }
+  tickLive(); clearInterval(window._liveTimer); window._liveTimer=setInterval(tickLive,1000);
+
+  
+  $('#liveJoin').onclick = ()=>{ if($('#liveJoin').disabled) return toast('Disponible 10 min antes','err'); window.open(cls.meetUrl,'_blank','noopener'); toast('¡Vamos a clase!','ok'); };
+  $('#liveAV').onclick = ()=> $('#modalAV').showModal();
+  $('#liveICS').onclick = downloadICS;
+
+  
+  const list=$('#liveList'); list.innerHTML='';
+  state.liveClasses.forEach((c,idx)=>{
+    if(idx===i) return;
+    const lockedBtn = `<button class="btn btn-soft opacity-60 cursor-not-allowed"><i class="fa-solid fa-lock mr-1"></i>Bloqueado</button>`;
+    const li = document.createElement('li');
+    li.className='p-4 border rounded-2xl flex items-center justify-between';
+    li.innerHTML = `
+      <div>
+        <p class="font-extrabold">${c.title}</p>
+        <p class="text-sm text-slate-600">
+          ${c.start.toLocaleDateString('es-CO',{weekday:'long',month:'long',day:'numeric'})} · ${fmtRange(c.start,c.end)}
+        </p>
+      </div>
+      ${lockedBtn}
+    `;
+    list.appendChild(li);
+  });
+}
+function setActiveView(view){
+  $$('.view').forEach(v=>v.classList.add('hidden'));
+  const target = $(`[data-view-id="${view}"]`);
+  if(target) target.classList.remove('hidden');
+  $$('#sideNav a').forEach(a=>a.classList.remove('sidebar-active'));
+  const active = $(`#sideNav a[data-view="${view}"]`);
+  if(active) active.classList.add('sidebar-active');
+}
+
+ 
+const confettiCanvas = document.getElementById('confetti-canvas');
+const ctx = confettiCanvas.getContext('2d'); let confettis=[];
+function resizeCanvas(){ confettiCanvas.width=innerWidth; confettiCanvas.height=innerHeight }
+addEventListener('resize',resizeCanvas); resizeCanvas();
+function shootConfetti(){
+  for(let i=0;i<160;i++){
+    confettis.push({
+      x: Math.random()*innerWidth, y: -10, r: 4+Math.random()*6,
+      c: ['#A78BFA','#60A5FA','#22D3EE','#34D399','#F59E0B','#FB7185'][Math.floor(Math.random()*6)],
+      s: 2+Math.random()*3, a: Math.random()*Math.PI
+    });
+  }
+}
+function tick(){
+  ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  confettis.forEach(p=>{
+    p.y += p.s; p.x += Math.sin(p.a+=0.02)*1.2;
+    ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  });
+  confettis = confettis.filter(p=> p.y < innerHeight+10);
+  requestAnimationFrame(tick);
+}
+tick();
+
+ 
+function updateCountdown(){
+  const now=Date.now(), start=state.class.start.getTime(), end=state.class.end.getTime();
+  const btn=$('#btnJoin'), pill=$('#livePill'); let label='—', join=false;
+  if(now<start){ const diff=start-now; const m=Math.floor(diff/60000), s=Math.floor((diff%60000)/1000); label=`${fmt2(m)}:${fmt2(s)}`; join=(diff<=10*60*1000); pill.classList.add('hidden') }
+  else if(now<=end){ label='En curso'; join=true; pill.classList.remove('hidden') }
+  else { label='Finalizada'; join=false; pill.classList.add('hidden') }
+  $('#countdown').textContent=label; btn.disabled=!join; btn.setAttribute('aria-disabled', String(!join))
+}
+function downloadICS(){
+  const dt=d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const ics=`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PlataformaEscolar//ES
+BEGIN:VEVENT
+UID:${crypto.randomUUID()}
+DTSTAMP:${dt(new Date())}
+DTSTART:${dt(state.class.start)}
+DTEND:${dt(state.class.end)}
+SUMMARY:${state.class.title}
+DESCRIPTION:Clase virtual ${state.class.provider}
+LOCATION:${state.class.meetUrl}
+END:VEVENT
+END:VCALENDAR`.trim();
+  const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='PlataformaEscolar-clase.ics'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Evento descargado (ICS)','ok')
+}
+
+ 
+let kidsIndex=0;
+const KIND_MAP={ 'PROYECTO':{emoji:'📘', pill:'bg-amber-100 text-amber-700', cta:'Continuar'},
+                 'PRÁCTICA':{emoji:'🧩', pill:'bg-sky-100 text-sky-700',   cta:'Empezar'},
+                 'QUIZ':    {emoji:'📝', pill:'bg-emerald-100 text-emerald-700', cta:'Realizar'} };
+function paintKidsCard(){
+  const t=state.tasks[kidsIndex]; if(!t) return; const kind=KIND_MAP[t.kind]||KIND_MAP['PRÁCTICA'];
+  $('#kidsKindIcon').textContent=kind.emoji; $('#kidsTitle').textContent=t.title; $('#kidsDue').textContent=`Vence en ${t.dueIn}`;
+  $('#kidsBody').innerHTML = `<div class="text-sm mb-2"><span class="chip ${kind.pill}">${t.kind}</span> <span class="ml-2">Estado: <b class="capitalize">${t.status}</b></span></div><p><b>Resumen:</b> ${t.desc}</p>`;
+  const cta=$('#kidsCTA'); cta.querySelector('span').textContent=kind.cta; cta.dataset.task=t.id;
+  const dots=$('#kidsDots'); dots.innerHTML=''; state.tasks.forEach((_,i)=>{ const d=document.createElement('div'); d.className='w-2.5 h-2.5 rounded-full '+(i===kidsIndex?'bg-indigo-600':'bg-indigo-200'); dots.appendChild(d) });
+}
+function showResumen(){ $('#tabResumen').classList.add('active'); $('#tabHacer').classList.remove('active'); paintKidsCard() }
+function showHacer(){ const t=state.tasks[kidsIndex]; $('#tabHacer').classList.add('active'); $('#tabResumen').classList.remove('active'); $('#kidsBody').innerHTML = `<p><b>¿Qué debes hacer?</b></p><ol class="list-decimal ml-6 mt-2 space-y-1 text-slate-700"><li>Lee el enunciado.</li><li>Piensa en un plan.</li><li>Programa y prueba.</li><li>Adjunta tus archivos o repo.</li></ol><p class="mt-2">${t.desc}</p>` }
+function nextTask(){ kidsIndex=(kidsIndex+1)%state.tasks.length; paintKidsCard() }
+function prevTask(){ kidsIndex=(kidsIndex-1+state.tasks.length)%state.tasks.length; paintKidsCard() }
+function speak(text){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='es-CO'; speechSynthesis.speak(u) }catch(e){} }
+function openTaskModal(taskId){
+  const t=state.tasks.find(x=>x.id===taskId); if(!t) return;
+  $('#taskTitle').textContent=t.title; $('#taskDesc').textContent=t.desc;
+  $('#taskFiles').value=''; $('#taskRepo').value=''; $('#taskAuth').checked=false;
+  $('#modalTask').showModal();
+  $('#btnSubmitTask').onclick=()=>{
+    const files=$('#taskFiles').files, repo=$('#taskRepo').value.trim(), auth=$('#taskAuth').checked;
+    if((!files||!files.length)&&!repo) return toast('Sube archivos o pega tu repo','err');
+    if(!auth) return toast('Acepta la autoría','err');
+    $('#modalTask').close(); t.status='enviado'; shootConfetti(); $('#sfxWin').play?.();
+    $('#badgeTasks').textContent=Math.max(0, +$('#badgeTasks').textContent-1);
+    renderTasksTable(); toast('¡Entrega registrada! 🎉','ok')
+  }
+}
+
+ 
+function renderRecent(){
+  const u=$('#recentList'); u.innerHTML='';
+  const tone=(t)=>({emerald:'emerald',sky:'sky',fuchsia:'fuchsia',amber:'amber'}[t]||'indigo');
+  state.recent.forEach(r=>{
+    u.innerHTML += `<li class="flex items-start gap-3"><div class="w-9 h-9 rounded-xl grid place-items-center bg-${tone(r.tone)}-100 text-${tone(r.tone)}-700"><i class="fa-solid fa-${r.icon}"></i></div><div><p class="font-bold">${r.title}</p><p class="text-xs text-slate-600">${r.text}</p><p class="text-[11px] text-slate-400">${r.when}</p></div></li>`;
+  })
+}
+function renderPath(){
+  const box=$('#pathList'); box.innerHTML='';
+  state.path.forEach(p=>{
+    box.innerHTML += `<div><div class="flex justify-between text-sm"><span class="font-bold">${p.name}</span><span>${p.pct}%</span></div><div class="pillbar mt-1"><span style="width:${p.pct}%;background:${p.color==='slate'?'linear-gradient(90deg,#CBD5E1,#94A3B8)':'linear-gradient(90deg,#818CF8,#22D3EE)'}"></span></div></div>`;
+  })
+}
+function renderNotifications(){
+  const ul=$('#notifList'); ul.innerHTML='';
+  state.notifications.forEach(n=> ul.innerHTML += `<li class="p-3 flex items-center gap-3"><div class="w-2 h-2 ${n.read?'bg-slate-300':'bg-indigo-600'} rounded-full"></div><div class="flex-1 text-sm">${n.text}</div><button data-notif="${n.id}" class="text-xs text-indigo-600 hover:underline">${n.read?'Abrir':'Marcar leída'}</button></li>`);
+  $('#notifDot').classList.toggle('hidden', state.notifications.every(n=>n.read))
+}
+function renderCourses(){
+  const g=$('#coursesGrid'); g.innerHTML='';
+  state.courses.forEach((c, idx)=>{
+    const isLocked = !c.unlocked;
+    const isCurrent = c.current;
+    
+    
+    let periodIcon = '';
+    switch(idx) {
+      case 0: periodIcon = '🐍'; break; 
+      case 1: periodIcon = '📦'; break; 
+      case 2: periodIcon = '📊'; break; 
+      case 3: periodIcon = '🚀'; break; 
+      default: periodIcon = '📚';
+    }
+    
+    g.innerHTML += `
+      <div class="card course-card p-5 flex flex-col ${isCurrent ? 'border-4 border-purple-500' : isLocked ? 'opacity-60' : ''}">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-14 h-14 grid place-items-center rounded-xl text-4xl ${isLocked ? 'bg-slate-100' : 'bg-gradient-to-br from-purple-100 to-indigo-100'}">
+            ${isLocked ? '🔒' : periodIcon}
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h3 class="font-extrabold text-lg ${isLocked ? 'text-slate-500' : ''}">${c.title}</h3>
+              ${isCurrent ? '<span class="chip bg-purple-100 text-purple-700 text-xs"><i class="fa-solid fa-star mr-1"></i>Actual</span>' : ''}
+            </div>
+            <p class="text-xs text-slate-500"><i class="fa-solid fa-calendar mr-1"></i>${c.subtitle}</p>
+          </div>
+        </div>
+        
+        <p class="text-sm text-slate-600 mb-3">${c.desc}</p>
+        
+        ${!isLocked ? `
+          <div class="mb-3">
+            <div class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>Progreso</span>
+              <span><b>${c.progress}%</b> (${c.hours}/${c.totalHours}h)</span>
+            </div>
+            <div class="pillbar"><span style="width:${c.progress}%"></span></div>
+          </div>
+          
+          <div class="mb-3 text-xs text-slate-600">
+            <p><i class="fa-solid fa-book mr-1"></i>${c.weeks} semanas • ${c.totalHours} horas totales</p>
+          </div>
+          
+          <details class="mb-3">
+            <summary class="text-xs font-bold text-slate-700 cursor-pointer hover:text-purple-600">Ver temas principales</summary>
+            <ul class="mt-2 space-y-1 text-xs text-slate-600 pl-3">
+              ${c.topics.map(t => `<li>• ${t}</li>`).join('')}
+            </ul>
+          </details>
+        ` : `
+          <div class="text-center py-4 text-slate-400">
+            <i class="fa-solid fa-lock text-2xl mb-2"></i>
+            <p class="text-xs font-semibold">Período bloqueado</p>
+            <p class="text-xs mt-1">Se desbloqueará al completar el período anterior</p>
+          </div>
+        `}
+        
+        <div class="mt-auto">
+          <button class="btn ${isLocked ? 'bg-slate-300 text-slate-600 cursor-not-allowed' : 'btn-primary'} w-full" data-open-course="${c.id}" ${isLocked ? 'disabled' : ''}>
+            ${isLocked ? '<i class="fa-solid fa-lock mr-2"></i>Bloqueado' : '<i class="fa-solid fa-play mr-2"></i>Ver contenido'}
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  
+  
+  g.addEventListener('click',(e)=>{ 
+    const b=e.target.closest('[data-open-course]'); 
+    if(b && !b.disabled) showCourse(b.dataset.openCourse) 
+  })
+}
+
+
+ 
+function showCourse(id){
+  const c = state.courses.find(x=>x.id===id); 
+  if(!c) return toast('Curso no encontrado','err');
+  if(!c.unlocked) return toast('Este período está bloqueado','err');
+  
+  let detail = document.querySelector('[data-view-id="courseDetail"]');
+  if(!detail){
+    detail = document.createElement('section'); detail.setAttribute('data-view-id','courseDetail'); detail.className='view hidden';
+    detail.innerHTML = `
+      <div class="mb-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="coursePeriodIcon" class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-400 to-indigo-500 text-white grid place-items-center text-3xl"></div>
+          <div>
+            <h2 id="courseTitle" class="text-2xl font-extrabold"></h2>
+            <p id="courseSubtitle" class="text-sm text-slate-500 mt-1"></p>
+          </div>
+        </div>
+        <button id="btnBackCourse" class="btn btn-soft"><i class="fa-solid fa-arrow-left mr-2"></i>Volver a Períodos</button>
+      </div>
+      
+      <div class="card p-4 mb-4 bg-gradient-to-r from-purple-50 to-indigo-50">
+        <p id="courseDesc" class="text-sm text-slate-700"></p>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        
+        <div class="lg:col-span-3" id="courseModules"></div>
+        
+        
+        <aside class="space-y-4">
+          <div class="card p-4">
+            <h3 class="font-bold mb-3"><i class="fa-solid fa-chart-line text-purple-500 mr-2"></i>Progreso</h3>
+            <div class="pillbar mb-2"><span id="courseProgressBar" style="width:0%"></span></div>
+            <p class="text-sm text-center mt-2"><b id="courseProgress"></b></p>
+          </div>
+          
+          <div class="card p-4">
+            <h3 class="font-bold mb-3"><i class="fa-solid fa-clock text-amber-500 mr-2"></i>Duración</h3>
+            <p class="text-2xl font-extrabold text-center"><span id="courseHours"></span>/<span id="courseTotalHours"></span>h</p>
+            <p class="text-xs text-center text-slate-600 mt-1">completadas de <span id="courseWeeks"></span> semanas</p>
+          </div>
+          
+          <div class="card p-4">
+            <h3 class="font-bold mb-3"><i class="fa-solid fa-calendar text-cyan-500 mr-2"></i>Calendario</h3>
+            <p class="text-sm"><i class="fa-solid fa-play-circle text-green-500 mr-2"></i><b>Inicio:</b> <span id="courseStartDate"></span></p>
+            <p class="text-sm mt-2"><i class="fa-solid fa-flag-checkered text-red-500 mr-2"></i><b>Fin:</b> <span id="courseEndDate"></span></p>
+          </div>
+          
+          <div class="card p-4">
+            <h3 class="font-bold mb-3"><i class="fa-solid fa-book text-indigo-500 mr-2"></i>Contenido</h3>
+            <p class="text-sm"><b id="courseModuleCount"></b> semanas</p>
+            <p class="text-sm mt-1"><b id="courseLessonCount"></b> lecciones</p>
+          </div>
+        </aside>
+      </div>
+    `;
+    document.querySelector('main').appendChild(detail);
+    detail.querySelector('#btnBackCourse').onclick = ()=> setActiveView('courses');
+  }
+  
+  
+  const periodIcons = ['🐍', '📦', '📊', '🚀'];
+  const periodIndex = state.courses.findIndex(x => x.id === id);
+  $('#coursePeriodIcon').textContent = periodIcons[periodIndex] || '📚';
+  
+  $('#courseTitle').textContent = c.title;
+  $('#courseSubtitle').textContent = c.subtitle;
+  $('#courseDesc').textContent = c.desc;
+  $('#courseHours').textContent = c.hours;
+  $('#courseTotalHours').textContent = c.totalHours;
+  $('#courseWeeks').textContent = c.weeks;
+  $('#courseProgress').textContent = c.progress + '%';
+  $('#courseProgressBar').style.width = c.progress + '%';
+  $('#courseStartDate').textContent = c.subtitle.split(' - ')[0];
+  $('#courseEndDate').textContent = c.subtitle.split(' - ')[1];
+  
+  
+  const totalModules = state.modules.length;
+  const totalLessons = state.modules.reduce((sum, m) => sum + m.lessons.length, 0);
+  $('#courseModuleCount').textContent = totalModules;
+  $('#courseLessonCount').textContent = totalLessons;
+  
+  
+  renderCourseModules();
+  
+  setActiveView('courseDetail');
+}
+
+ 
+function renderCourseModules(){
+  const container = $('#courseModules');
+  container.innerHTML = '';
+  
+  
+  const grid = document.createElement('div');
+  grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+  
+  state.modules.forEach((mod, idx) => {
+    const isLocked = !mod.unlocked;
+    const isCurrent = mod.current || false;
+    const isCompleted = mod.completed || false;
+    
+    
+    let weekIcon = '📅';
+    if(isCompleted) weekIcon = '✅';
+    else if(isCurrent) weekIcon = '⭐';
+    else if(isLocked) weekIcon = '🔒';
+    else if(mod.type === 'project') weekIcon = '🚀';
+    else if(mod.type === 'quiz') weekIcon = '📝';
+    
+    const weekCard = document.createElement('div');
+    weekCard.className = `card p-5 course-card transition-all hover:shadow-xl cursor-pointer ${
+      isCurrent ? 'border-4 border-purple-500' : ''
+    } ${isLocked ? 'opacity-60' : ''}`;
+    
+    weekCard.innerHTML = `
+      <div class="flex items-start justify-between mb-3">
+        <div class="text-5xl">${weekIcon}</div>
+        ${isCurrent ? '<span class="chip bg-purple-100 text-purple-700 text-xs"><i class="fa-solid fa-star mr-1"></i>Actual</span>' : ''}
+        ${isCompleted ? '<span class="chip bg-green-100 text-green-700 text-xs"><i class="fa-solid fa-check mr-1"></i>Completada</span>' : ''}
+      </div>
+      
+      <h3 class="font-bold text-xl mb-2 ${isLocked ? 'text-slate-500' : isCurrent ? 'text-purple-600' : 'text-slate-800'}">${mod.title}</h3>
+      <p class="text-sm text-slate-500 mb-4">${mod.dates || 'Por definir'}</p>
+      
+      ${!isLocked ? `
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center gap-2 text-sm text-slate-600">
+            <i class="fa-solid fa-book-open"></i>
+            <span>${mod.lessons.length} lecciones</span>
+          </div>
+          ${mod.hours ? `
+            <div class="flex items-center gap-2 text-sm text-slate-600">
+              <i class="fa-solid fa-clock"></i>
+              <span>${mod.hours}</span>
+            </div>
+          ` : ''}
+        </div>
+        
+        ${mod.progress !== undefined ? `
+          <div class="mb-4">
+            <div class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>Progreso</span>
+              <span>${mod.progress}%</span>
+            </div>
+            <div class="pillbar">
+              <span style="width:${mod.progress}%"></span>
+            </div>
+          </div>
+        ` : ''}
+      ` : `
+        <div class="text-center py-4 text-slate-400">
+          <i class="fa-solid fa-lock text-3xl mb-2 opacity-40"></i>
+          <p class="text-sm font-semibold">Semana bloqueada</p>
+          <p class="text-xs mt-1">Completa la anterior</p>
+        </div>
+      `}
+      
+      <button class="btn ${isLocked ? 'btn-soft opacity-50 cursor-not-allowed' : isCurrent ? 'btn-primary' : 'btn-soft'} w-full" ${isLocked ? 'disabled' : ''}>
+        ${isLocked ? '<i class="fa-solid fa-lock mr-2"></i>Bloqueada' : 
+          isCurrent ? '<i class="fa-solid fa-play mr-2"></i>Continuar' : 
+          isCompleted ? '<i class="fa-solid fa-eye mr-2"></i>Revisar' : 
+          '<i class="fa-solid fa-arrow-right mr-2"></i>Ver contenido'}
+      </button>
+    `;
+    
+    
+    if(!isLocked) {
+      weekCard.addEventListener('click', () => showWeekContent(idx));
+    }
+    
+    grid.appendChild(weekCard);
+  });
+  
+  container.appendChild(grid);
+}
+
+ 
+function showWeekContent(weekIdx){
+  const week = state.modules[weekIdx];
+  if(!week || !week.unlocked) return toast('Semana bloqueada','err');
+  
+  
+  $('#courseModules').innerHTML = `
+    <div class="mb-6">
+      <button onclick="renderCourseModules()" class="btn btn-soft">
+        <i class="fa-solid fa-arrow-left mr-2"></i>Volver a Semanas
+      </button>
+    </div>
+    
+    <div class="card p-6 mb-6">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="text-6xl">${week.current ? '⭐' : week.completed ? '✅' : '📅'}</div>
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-2">${week.title}</h2>
+          <p class="text-slate-600 mb-3">${week.dates || ''}</p>
+          ${week.description ? `<p class="text-slate-700">${week.description}</p>` : ''}
+        </div>
+      </div>
+      
+      ${week.progress !== undefined ? `
+        <div class="mb-4">
+          <div class="flex justify-between text-sm text-slate-600 mb-2">
+            <span class="font-semibold">Progreso de la semana</span>
+            <span class="font-bold">${week.progress}%</span>
+          </div>
+          <div class="pillbar" style="height:18px">
+            <span style="width:${week.progress}%"></span>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+    
+    <h3 class="text-xl font-bold mb-4">📚 Contenido de la Semana</h3>
+    <div class="space-y-3">
+      ${renderModuleLessons(week)}
+    </div>
+  `;
+}
+
+ 
+function renderModuleLessons(mod){
+  let html = '<div class="space-y-2">';
+  
+  mod.lessons.forEach((lesson, idx) => {
+    const isCompleted = lesson.completed || false;
+    const statusIcon = isCompleted ? 
+      '<i class="fa-solid fa-check-circle text-green-500"></i>' : 
+      '<i class="fa-regular fa-circle text-slate-300"></i>';
+    
+    
+    let typeIcon = '';
+    let typeColor = '';
+    let typeBg = '';
+    
+    switch(lesson.type){
+      case 'video':
+        typeIcon = 'fa-play-circle';
+        typeColor = 'text-purple-500';
+        typeBg = 'bg-purple-50';
+        break;
+      case 'live':
+        typeIcon = 'fa-video';
+        typeColor = 'text-rose-500';
+        typeBg = 'bg-rose-50';
+        break;
+      case 'assignment':
+        typeIcon = 'fa-file-pen';
+        typeColor = 'text-amber-500';
+        typeBg = 'bg-amber-50';
+        break;
+      case 'quiz':
+        typeIcon = 'fa-clipboard-question';
+        typeColor = 'text-cyan-500';
+        typeBg = 'bg-cyan-50';
+        break;
+      case 'project':
+        typeIcon = 'fa-code';
+        typeColor = 'text-indigo-500';
+        typeBg = 'bg-indigo-50';
+        break;
+      default:
+        typeIcon = 'fa-book';
+        typeColor = 'text-slate-500';
+        typeBg = 'bg-slate-50';
+    }
+    
+    html += `
+      <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border-2 border-transparent hover:border-purple-200 cursor-pointer lesson-item" data-lesson="${lesson.id}">
+        <div class="w-10 h-10 rounded-lg ${typeBg} grid place-items-center ${typeColor}">
+          <i class="fa-solid ${typeIcon}"></i>
+        </div>
+        <div class="flex-1">
+          <p class="font-semibold text-sm ${isCompleted ? 'text-slate-500 line-through' : ''}">${lesson.title}</p>
+          <p class="text-xs text-slate-500"><i class="fa-solid fa-clock mr-1"></i>${lesson.duration || '45 min'}</p>
+        </div>
+        <div class="text-xl">${statusIcon}</div>
+        ${!isCompleted ? `<button class="btn btn-soft text-xs" onclick="event.stopPropagation(); toast('Abriendo lección...','ok'); setActiveView('live')">
+          <i class="fa-solid fa-play mr-1"></i>Iniciar
+        </button>` : ''}
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+let currentLesson=null;
+function renderTasksTable(filter='all'){
+  const wrap=$('#tasksTable'); const tbl=document.createElement('table'); tbl.className='w-full text-sm';
+  tbl.innerHTML=`<thead class="bg-indigo-50"><tr><th class="p-3 text-left">Actividad</th><th class="p-3">Tipo</th><th class="p-3">Vence</th><th class="p-3">Estado</th><th class="p-3 text-right">Acción</th></tr></thead><tbody id="tasksBody"></tbody>`;
+  wrap.innerHTML=''; wrap.appendChild(tbl);
+  const body=tbl.querySelector('#tasksBody'); const rows=state.tasks.filter(t=> filter==='all'||t.status===filter);
+  if(!rows.length){ body.innerHTML=`<tr><td colspan="5" class="p-4 text-center text-slate-500">No hay tareas en este filtro.</td></tr>`; return }
+  rows.forEach(t=>{
+    const tr=document.createElement('tr'); tr.className='border-b';
+    tr.innerHTML = `<td class="p-3">${t.title}</td><td class="p-3 text-center">${t.kind}</td><td class="p-3 text-center">${t.dueIn}</td><td class="p-3 text-center capitalize">${t.status}</td><td class="p-3 text-right"><button data-task="${t.id}" class="btn btn-primary">Entregar</button></td>`;
+    body.appendChild(tr)
+  });
+  body.addEventListener('click',(e)=>{ const b=e.target.closest('button[data-task]'); if(b) openTaskModal(b.dataset.task) },{once:true})
+}
+function calcAverage(){
+  const total=state.grades.items.reduce((s,i)=>s+i.weight,0);
+  const got=state.grades.items.filter(i=>i.grade!=null).reduce((s,i)=>s+i.grade*i.weight,0);
+  return got/total;
+}
+function renderGrades(){
+  const panel=$('#gradesPanel'); panel.innerHTML='';
+  const avg=calcAverage();
+  panel.innerHTML += `<div class="card p-4 flex items-center justify-between"><div><p class="text-sm text-slate-500">Promedio actual</p><p class="text-2xl font-extrabold">${avg.toFixed(2)} / 5.0</p></div><button id="btnSim" class="btn btn-primary">Simular nota</button></div>`;
+  const table=document.createElement('table'); table.className='w-full text-sm';
+  table.innerHTML=`<thead class="bg-indigo-50"><tr><th class="p-3 text-left">Actividad</th><th class="p-3">Peso</th><th class="p-3">Nota</th><th class="p-3">Estado</th></tr></thead><tbody></tbody>`;
+  const tb=table.querySelector('tbody');
+  state.grades.items.forEach(it=> tb.innerHTML += `<tr class="border-b"><td class="p-3">${it.name}</td><td class="p-3 text-center">${it.weight}%</td><td class="p-3 text-center">${it.grade!=null?it.grade.toFixed(1):'—'}</td><td class="p-3 text-center">${it.published?'Publicado':'Pendiente'}</td></tr>`);
+  panel.appendChild(table);
+  $('#btnSim').onclick=()=>{
+    const pending=state.grades.items.filter(i=>i.grade==null);
+    if(!pending.length) return toast('No hay actividades pendientes','default');
+    const target=prompt(`Promedio actual ${avg.toFixed(2)}. ¿Qué nota final deseas (0–5)?`,'4.5');
+    const desired=Number(target); if(isNaN(desired)) return;
+    const need=(desired*100 - state.grades.items.filter(i=>i.grade!=null).reduce((s,i)=>s+i.grade*i.weight,0)) / pending.reduce((s,i)=>s+i.weight,0);
+    alert(`Para alcanzar ${desired.toFixed(2)}/5 necesitas aprox. ${need.toFixed(2)} en las pendientes.`);
+  }
+}
+
+ 
+ 
+function initHeader() {
+  
+  const headerName = $('#headerStudentName');
+  const headerGrade = $('#headerStudentGrade');
+  const studentInfo = $('#studentInfo');
+  const studentAvatar = $('#studentAvatar');
+  
+  if (headerName) headerName.textContent = state.student.name;
+  if (headerGrade) headerGrade.textContent = `${state.student.gradeName} - ${state.student.level}`;
+  if (studentInfo) studentInfo.textContent = `${state.student.gradeName} • Período ${state.student.period}`;
+  
+  
+  if (studentAvatar) {
+    const initials = state.student.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    studentAvatar.textContent = initials;
+  }
+  
+  
+  const btnLogout = $('#btnLogout');
+  if (btnLogout) {
+    btnLogout.onclick = () => {
+      if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+        localStorage.removeItem('currentUser');
+        window.location.href = '../../index.html';
+      }
+    };
+  }
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  
+  initHeader();
+  
+  
+  $('#classProvider').textContent=state.class.provider;
+  const d=state.class.start, end=state.class.end, opts={hour:'2-digit',minute:'2-digit'};
+  $('#classDateLabel').textContent=d.toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  $('#classTimeLabel').textContent=`${d.toLocaleTimeString('es-CO',opts)} – ${end.toLocaleTimeString('es-CO',opts)} (GMT-5)`;
+  const elLiveWhen = $('#liveWhen'); if(elLiveWhen) elLiveWhen.textContent = `${d.toLocaleDateString('es-CO',{weekday:'long',month:'long',day:'numeric'})} ${d.toLocaleTimeString('es-CO',opts)}`;
+
+  
+  updateCountdown(); setInterval(updateCountdown, 1000);
+  $('#btnJoin').onclick=()=>{ if($('#btnJoin').disabled) return toast('Disponible 10 min antes','err'); window.open(state.class.meetUrl,'_blank','noopener'); toast('¡Vamos a clase!','ok') }
+  $('#btnAddCalendar').onclick=downloadICS;
+  $('#btnAVTest').onclick=()=>$('#modalAV').showModal();
+  $('#btnPlayTone').onclick=()=>{ $('#tone').play(); toast('Tono de prueba','ok') }
+
+  
+  renderLive();
+
+  
+  paintKidsCard();
+  $('#tabResumen').onclick=showResumen; $('#tabHacer').onclick=showHacer;
+  $('#nextTask').onclick=nextTask; $('#prevTask').onclick=prevTask;
+  $('#kidsCTA').onclick=(e)=> openTaskModal(e.currentTarget.dataset.task);
+  $('#kidsRead').onclick=()=>{ const t=state.tasks[kidsIndex]; speak(`${t.kind}. ${t.title}. Vence en ${t.dueIn}. ${t.desc}`) }
+
+  renderRecent(); renderPath(); renderNotifications(); setupChat();
+  $('#btnNotifications').onclick=()=>{ const p=$('#panelNotifications'); p.classList.toggle('hidden') }
+  $('#markAllRead').onclick=()=>{ state.notifications.forEach(n=>n.read=true); renderNotifications(); toast('Notificaciones leídas','ok') }
+  $('#panelNotifications').addEventListener('click',(e)=>{ const b=e.target.closest('button[data-notif]'); if(!b) return; const n=state.notifications.find(x=>x.id===b.dataset.notif); if(n){ n.read=true; renderNotifications(); toast('Notificación marcada','ok') }})
+
+  $$('#sideNav a').forEach(a=> a.addEventListener('click',(e)=>{ e.preventDefault(); setActiveView(a.dataset.view) }))
+  Array.from(document.querySelectorAll('.btn, .chip, [data-view]')).forEach(b=>{
+    if(!b || !b.dataset) return;
+    if(b.dataset.view) b.addEventListener('click',()=> setActiveView(b.dataset.view));
+  })
+  $('[data-action="goTasks"]').onclick=()=> setActiveView('tasks');
+
+  renderCourses();
+
+  renderTasksTable('all');
+  $('[data-filter="all"]').onclick=()=>renderTasksTable('all');
+  $('[data-filter="pendiente"]').onclick=()=>renderTasksTable('pendiente');
+  $('[data-filter="enviado"]').onclick=()=>renderTasksTable('enviado');
+
+  renderGrades();
+
+  $('#chatForm').addEventListener('submit',(e)=>{ e.preventDefault(); const t=$('#chatInput'); const val=t.value.trim(); if(!val) return; appendMsg(val,true); t.value=''; setTimeout(()=>appendMsg('¡Recibido! ✔️'),600) })
+
+  $('#saveProfile').onclick=()=> toast('Perfil actualizado','ok');
+
+  setActiveView('dashboard');
+});
+
+function setupChat(){
+  const list=$('#chatList'); list.innerHTML='';
+  const channels=[
+    {id:'c1',name:'Asesor · Carlos Mendoza',unread:2},
+    {id:'c2',name:'Grupo de clase',unread:0},
+  ];
+  channels.forEach(c=>{
+    const li=document.createElement('li'); li.className='px-3 py-3 flex items-center justify-between cursor-pointer hover:bg-indigo-50';
+    li.innerHTML=`<span class="font-bold">${c.name}</span>${c.unread?`<span class="chip bg-emerald-100 text-emerald-700 text-xs">${c.unread}</span>`:''}`;
+    li.onclick=()=>loadChannel(c); list.appendChild(li);
+  }); loadChannel(channels[0])
+}
+function loadChannel(c){
+  $('#chatHeader').textContent=c.name; const thread=$('#chatThread'); thread.innerHTML='';
+  const seed=[{me:false,text:'Hola, ¿tienes dudas del proyecto?'},{me:true,text:'Profe, ¿puedo usar dataclasses?'},{me:false,text:'Sí, ¡excelente idea!'}];
+  seed.forEach(m=>appendMsg(m.text,m.me)); $('#chatInput').focus()
+}
+function appendMsg(text,me=false){
+  const wrap=document.createElement('div'); wrap.className='max-w-[80%] '+(me?'ml-auto':'');
+  const bubble=document.createElement('div'); bubble.className='px-3 py-2 rounded-2xl text-sm '+(me?'bg-indigo-600 text-white':'bg-indigo-50 border border-indigo-100');
+  bubble.textContent=text; wrap.appendChild(bubble); $('#chatThread').appendChild(wrap); $('#chatThread').scrollTop = $('#chatThread').scrollHeight
+}
+
+let pyodide = null; let pyRunning = false;
+async function ensurePyodide(){
+  if(pyodide) return pyodide;
+  const status = $('#pyStatus'); status.textContent='Cargando Pyodide...';
+  await new Promise((res,rej)=>{
+    const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s);
+  });
+  pyodide = await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/'});
+  status.textContent='Pyodide listo';
+  return pyodide;
+}
+function appendOut(txt){ const out=$('#pyOut'); out.textContent += txt; out.scrollTop = out.scrollHeight }
+async function runPy(){
+  try{
+    await ensurePyodide();
+    const code = $('#pyCode').value;
+    $('#btnRunPy').disabled = true; $('#pyStatus').textContent='Ejecutando...'; pyRunning=true;
+    const stdout=[]; const stderr=[];
+    pyodide.setStdout({batched: (s)=> stdout.push(s)});
+    pyodide.setStderr({batched: (s)=> stderr.push(s)});
+    await pyodide.runPythonAsync(code);
+    if(stdout.length) appendOut(stdout.join(''));
+    if(stderr.length) appendOut('\n[stderr]\n'+stderr.join(''));
+  }catch(e){ appendOut('\n[error] '+e.toString()) }
+  finally{ $('#btnRunPy').disabled=false; $('#pyStatus').textContent='Listo'; pyRunning=false }
+}
+function stopPy(){
+  if(!pyRunning) return;
+  appendOut('\n[info] Detener no disponible en esta versión. Recarga la página para abortar.');
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const runBtn=$('#btnRunPy'), stopBtn=$('#btnStopPy');
+  if(runBtn) runBtn.onclick = ()=>{ $('#pyOut').textContent=''; runPy() };
+  if(stopBtn) stopBtn.onclick = ()=> stopPy();
+  try{
+    const store = JSON.parse(localStorage.getItem('attendance') || '{}');
+    const grade = currentUser.grade || studentGrade;
+    let total=0, present=0;
+    const today = new Date().toISOString().slice(0,10);
+    let todayStatus = 'Sin registro';
+    for(const date in store){
+      const grades = store[date];
+      if(grades && grades[grade]){
+        total++;
+        const status = grades[grade][currentUser.email];
+        if(status === 'present') present++;
+        if(date === today) todayStatus = status ? (status === 'present' ? 'Presente' : 'Ausente') : 'Sin registro';
+      }
+    }
+    const pct = total>0 ? Math.round((present/total)*100) : 0;
+    const el = document.getElementById('attendanceSummary');
+    if(el) el.textContent = `Asistencia: ${pct}% · Hoy: ${todayStatus}`;
+  }catch(e){ console.error('Error al calcular asistencia:', e); }
+});
+</script>
+</body>
+</html>

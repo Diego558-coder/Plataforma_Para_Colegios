@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Estudiantes - Plataforma Escolar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .step-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transform: scale(1.1);
+            animation: pulse 2s infinite;
+        }
+        .step-completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+        .step-inactive {
+            background: rgba(255, 255, 255, 0.3);
+            color: #94a3b8;
+            backdrop-filter: blur(10px);
+        }
+        .card-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .input-modern {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        .input-modern:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        .progress-line {
+            position: relative;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-line-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+        .benefit-card {
+            transition: all 0.3s ease;
+        }
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+        }
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+        }
+        .shape1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+        .shape2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            bottom: -50px;
+            left: -50px;
+            animation: float 6s ease-in-out infinite reverse;
+        }
+        .testimonial {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="relative overflow-x-hidden">
+    
+    <div class="floating-shapes">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+    </div>
+    
+    <header class="relative z-10 bg-white/90 backdrop-blur-lg shadow-lg border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 animate__animated animate__fadeInLeft">
+                    <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center shadow-lg float-animation">
+                        <span class="text-white font-bold text-2xl">🎓</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                            Plataforma Escolar
+                        </h1>
+                        <p class="text-xs sm:text-sm text-gray-600 font-medium">Tu futuro académico comienza aquí</p>
+                    </div>
+                </div>
+                <a href="../index.html" class="hidden sm:flex items-center space-x-2 px-6 py-3 bg-white border-2 border-purple-200 text-purple-600 rounded-xl hover:bg-purple-50 transition-all font-semibold shadow-md hover:shadow-lg">
+                    <span>🔐</span>
+                    <span>Iniciar Sesión</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center mb-8 animate__animated animate__fadeInDown">
+            <h2 class="text-3xl sm:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                ¡Únete a Nuestra Comunidad Educativa! 🌟
+            </h2>
+            <p class="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto drop-shadow">
+                Completa tu registro en 3 sencillos pasos y accede a la mejor plataforma educativa digital
+            </p>
+        </div>
+
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate__animated animate__fadeInUp">
+            <div class="benefit-card card-glass rounded-2xl p-6 text-center">
+                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="text-3xl">📚</span>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2 text-lg">Contenido Premium</h3>
+                <p class="text-gray-600 text-sm">Acceso a cursos, videos y materiales educativos de alta calidad</p>
+            </div>
+            <div class="benefit-card card-glass rounded-2xl p-6 text-center">
+                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="text-3xl">👩‍🏫</span>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2 text-lg">Profesores Expertos</h3>
+                <p class="text-gray-600 text-sm">Docentes calificados te acompañan en tu proceso de aprendizaje</p>
+            </div>
+            <div class="benefit-card card-glass rounded-2xl p-6 text-center">
+                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="text-3xl">📊</span>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2 text-lg">Seguimiento Personalizado</h3>
+                <p class="text-gray-600 text-sm">Monitorea tu progreso y recibe retroalimentación constante</p>
+            </div>
+        </div>
+        
+        <div class="card-glass rounded-2xl p-6 sm:p-8 mb-8 shadow-2xl animate__animated animate__fadeIn">
+            <div class="mb-6">
+                <div class="progress-line mb-8">
+                    <div id="progressBar" class="progress-line-fill" style="width: 33%"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 text-center relative">
+                        <div id="step1Circle" class="step-active w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 font-bold text-lg transition-all duration-300">1</div>
+                        <p class="text-xs sm:text-sm font-semibold text-gray-700">Información Personal</p>
+                        <p class="text-xs text-gray-500 mt-1 hidden sm:block">Datos básicos</p>
+                    </div>
+                    <div class="flex-1 border-t-2 border-dashed border-gray-300 mx-2 sm:mx-4 mt-[-30px]"></div>
+                    <div class="flex-1 text-center relative">
+                        <div id="step2Circle" class="step-inactive w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 font-bold text-lg transition-all duration-300">2</div>
+                        <p class="text-xs sm:text-sm font-semibold text-gray-700">Información Académica</p>
+                        <p class="text-xs text-gray-500 mt-1 hidden sm:block">Colegio y grado</p>
+                    </div>
+                    <div class="flex-1 border-t-2 border-dashed border-gray-300 mx-2 sm:mx-4 mt-[-30px]"></div>
+                    <div class="flex-1 text-center relative">
+                        <div id="step3Circle" class="step-inactive w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 font-bold text-lg transition-all duration-300">3</div>
+                        <p class="text-xs sm:text-sm font-semibold text-gray-700">Confirmación</p>
+                        <p class="text-xs text-gray-500 mt-1 hidden sm:block">Pago y envío</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="card-glass rounded-2xl shadow-2xl p-6 sm:p-10 animate__animated animate__fadeInUp">
+            <form id="registrationForm">
+                
+                <div id="step1" class="step-content animate__animated animate__fadeIn">
+                    <div class="mb-6 text-center">
+                        <div class="w-20 h-20 gradient-bg rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl float-animation">
+                            <span class="text-4xl">👤</span>
+                        </div>
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                            Cuéntanos sobre ti
+                        </h2>
+                        <p class="text-gray-600">Completa tus datos personales para comenzar</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">✏️</span> Nombre Completo *
+                            </label>
+                            <input type="text" id="fullName" required
+                                   class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
+                                   placeholder="Ej: Juan Pérez García">
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">🆔</span> Documento de Identidad *
+                            </label>
+                            <input type="text" id="document" required
+                                   class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
+                                   placeholder="Ej: 1234567890">
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">📧</span> Correo Electrónico *
+                            </label>
+                            <input type="email" id="email" required
+                                   class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
+                                   placeholder="estudiante@email.com">
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">📱</span> Teléfono *
+                            </label>
+                            <input type="tel" id="phone" required
+                                   class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
+                                   placeholder="Ej: 3001234567">
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">🎂</span> Fecha de Nacimiento *
+                            </label>
+                            <input type="date" id="birthdate" required
+                                   class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none">
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">👥</span> Género *
+                            </label>
+                            <select id="gender" required
+                                    class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none">
+                                <option value="">Seleccionar...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <span class="mr-2">🏠</span> Dirección de Residencia *
+                        </label>
+                        <input type="text" id="address" required
+                               class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
+                               placeholder="Ej: Calle 123 #45-67, Barrio Centro">
+                    </div>
+
+                    <div class="mt-8 flex justify-end">
+                        <button type="button" onclick="nextStep(2)"
+                                class="btn-primary px-10 py-4 text-white rounded-xl font-bold text-lg shadow-xl flex items-center space-x-2">
+                            <span>Continuar</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div id="step2" class="step-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Información Académica</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Colegio *</label>
+                            <select id="school" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar colegio...</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Grado *</label>
+                            <select id="grade" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar grado...</option>
+                                <option value="1">1° Primaria</option>
+                                <option value="2">2° Primaria</option>
+                                <option value="3">3° Primaria</option>
+                                <option value="4">4° Primaria</option>
+                                <option value="5">5° Primaria</option>
+                                <option value="6">6° Bachillerato</option>
+                                <option value="7">7° Bachillerato</option>
+                                <option value="8">8° Bachillerato</option>
+                                <option value="9">9° Bachillerato</option>
+                                <option value="10">10° Bachillerato</option>
+                                <option value="11">11° Bachillerato</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Acudiente *</label>
+                        <input type="text" id="guardianName" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                               placeholder="Ej: María García">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono del Acudiente *</label>
+                            <input type="tel" id="guardianPhone" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="Ej: 3001234567">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email del Acudiente</label>
+                            <input type="email" id="guardianEmail"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="acudiente@email.com">
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-between">
+                        <button type="button" onclick="prevStep(1)"
+                                class="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">
+                            ← Atrás
+                        </button>
+                        <button type="button" onclick="nextStep(3)"
+                                class="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium">
+                            Siguiente →
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div id="step3" class="step-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Confirmación y Pago</h2>
+                    
+                    
+                    <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-6">
+                        <h3 class="font-semibold text-lg mb-4">Resumen de Registro</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Estudiante:</span>
+                                <span id="summaryName" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Documento:</span>
+                                <span id="summaryDocument" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Colegio:</span>
+                                <span id="summarySchool" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Grado:</span>
+                                <span id="summaryGrade" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-2 mt-2">
+                                <span class="text-gray-600 font-semibold">Valor a Pagar:</span>
+                                <span class="font-bold text-green-600 text-lg">$150.000 COP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="border-2 border-purple-200 rounded-lg p-6 mb-6">
+                        <h3 class="font-semibold text-lg mb-4 flex items-center">
+                            <span class="text-2xl mr-2">💳</span>
+                            Información de Pago
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago *</label>
+                                <select id="paymentMethod" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="card">Tarjeta de Crédito/Débito</option>
+                                    <option value="pse">PSE - Pago en Línea</option>
+                                    <option value="transfer">Transferencia Bancaria</option>
+                                </select>
+                            </div>
+
+                            <div id="cardFields" class="hidden space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Número de Tarjeta</label>
+                                    <input type="text" id="cardNumber" maxlength="19"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                           placeholder="1234 5678 9012 3456">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Vencimiento</label>
+                                        <input type="text" id="cardExpiry" maxlength="5"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                               placeholder="MM/AA">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                                        <input type="text" id="cardCvv" maxlength="4"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                               placeholder="123">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+                                <strong>Nota:</strong> Este es un ambiente de prueba. No se realizarán cargos reales.
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="mb-6">
+                        <label class="flex items-start space-x-3 cursor-pointer">
+                            <input type="checkbox" id="termsAccepted" required
+                                   class="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                            <span class="text-sm text-gray-700">
+                                Acepto los <a href="#" class="text-purple-600 hover:underline">términos y condiciones</a> 
+                                y la <a href="#" class="text-purple-600 hover:underline">política de privacidad</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button type="button" onclick="prevStep(2)"
+                                class="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">
+                            ← Atrás
+                        </button>
+                        <button type="submit" id="btnSubmit"
+                                class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center">
+                            <span class="mr-2">✓</span>
+                            Completar Registro y Pagar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 animate__animated animate__fadeIn">
+        <div class="bg-white rounded-3xl p-10 max-w-lg mx-4 text-center shadow-2xl animate__animated animate__zoomIn">
+            <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate__animated animate__bounceIn">
+                <span class="text-5xl text-white">✓</span>
+            </div>
+            <h3 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">
+                ¡Registro Exitoso!
+            </h3>
+            <p class="text-gray-600 mb-6 text-lg">
+                🎉 Tu solicitud ha sido enviada correctamente. Un administrador revisará tu información y te notificaremos cuando sea aprobada.
+            </p>
+            
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 mb-6 text-left border-2 border-purple-100">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-gray-700">📋 ID de Registro:</span>
+                    <span id="registrationId" class="font-mono font-bold text-purple-600">-</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">📊 Estado:</span>
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
+                        ⏳ Pendiente de Aprobación
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-4 mb-6">
+                <p class="text-sm text-blue-800">
+                    <strong>📧 Próximo paso:</strong> Recibirás un email de confirmación una vez tu solicitud sea aprobada por el administrador.
+                </p>
+            </div>
+            
+            <button onclick="window.location.href='../index.html'"
+                    class="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 font-bold text-lg shadow-lg transition-all hover:shadow-xl hover:scale-105">
+                Ir al Inicio de Sesión →
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+
+        
+        function loadSchools() {
+            const schools = JSON.parse(localStorage.getItem('schools') || '[]');
+            const select = document.getElementById('school');
+            
+            
+            select.innerHTML = '<option value="">Seleccionar colegio...</option>';
+            
+            schools.filter(s => s.status === 'active').forEach(school => {
+                const option = document.createElement('option');
+                option.value = school.id;
+                option.textContent = school.name;
+                select.appendChild(option);
+            });
+
+            
+            if (schools.length === 0) {
+                const defaultSchools = [
+                    { id: 'sch1', name: 'Colegio San José', city: 'Bogotá', status: 'active' },
+                    { id: 'sch2', name: 'Institución Educativa La Esperanza', city: 'Medellín', status: 'active' },
+                    { id: 'sch3', name: 'Colegio Americano', city: 'Cali', status: 'active' }
+                ];
+                localStorage.setItem('schools', JSON.stringify(defaultSchools));
+                loadSchools(); 
+            }
+        }
+
+        function nextStep(step) {
+            
+            if (!validateStep(currentStep)) {
+                return;
+            }
+
+            
+            const currentStepEl = document.getElementById(`step${currentStep}`);
+            currentStepEl.classList.add('animate__animated', 'animate__fadeOutLeft');
+            
+            setTimeout(() => {
+                currentStepEl.classList.add('hidden');
+                currentStepEl.classList.remove('animate__fadeOutLeft');
+                
+                
+                document.getElementById(`step${currentStep}Circle`).classList.remove('step-active');
+                document.getElementById(`step${currentStep}Circle`).classList.add('step-completed');
+
+                
+                currentStep = step;
+                const nextStepEl = document.getElementById(`step${currentStep}`);
+                nextStepEl.classList.remove('hidden');
+                nextStepEl.classList.add('animate__animated', 'animate__fadeInRight');
+                
+                
+                const nextCircle = document.getElementById(`step${currentStep}Circle`);
+                nextCircle.classList.remove('step-inactive');
+                nextCircle.classList.add('step-active');
+                
+                
+                const progress = (currentStep / 3) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+
+                
+                if (step === 3) {
+                    showSummary();
+                }
+                
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        function prevStep(step) {
+            const currentStepEl = document.getElementById(`step${currentStep}`);
+            currentStepEl.classList.add('animate__animated', 'animate__fadeOutRight');
+            
+            setTimeout(() => {
+                currentStepEl.classList.add('hidden');
+                currentStepEl.classList.remove('animate__fadeOutRight');
+                
+                document.getElementById(`step${currentStep}Circle`).classList.remove('step-active');
+                document.getElementById(`step${currentStep}Circle`).classList.add('step-inactive');
+                
+                currentStep = step;
+                const prevStepEl = document.getElementById(`step${currentStep}`);
+                prevStepEl.classList.remove('hidden');
+                prevStepEl.classList.add('animate__animated', 'animate__fadeInLeft');
+                
+                const prevCircle = document.getElementById(`step${currentStep}Circle`);
+                prevCircle.classList.remove('step-completed', 'step-inactive');
+                prevCircle.classList.add('step-active');
+                
+                
+                const progress = (currentStep / 3) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const fields = ['fullName', 'document', 'email', 'phone', 'birthdate', 'gender', 'address'];
+                for (const field of fields) {
+                    const input = document.getElementById(field);
+                    if (!input.value.trim()) {
+                        alert('Por favor completa todos los campos obligatorios');
+                        input.focus();
+                        return false;
+                    }
+                }
+            }
+            
+            if (step === 2) {
+                const fields = ['school', 'grade', 'guardianName', 'guardianPhone'];
+                for (const field of fields) {
+                    const input = document.getElementById(field);
+                    if (!input.value.trim()) {
+                        alert('Por favor completa todos los campos obligatorios');
+                        input.focus();
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+
+        function showSummary() {
+            const schoolSelect = document.getElementById('school');
+            const gradeSelect = document.getElementById('grade');
+            
+            document.getElementById('summaryName').textContent = document.getElementById('fullName').value;
+            document.getElementById('summaryDocument').textContent = document.getElementById('document').value;
+            document.getElementById('summarySchool').textContent = schoolSelect.options[schoolSelect.selectedIndex].text;
+            document.getElementById('summaryGrade').textContent = gradeSelect.options[gradeSelect.selectedIndex].text;
+        }
+
+        
+        document.getElementById('paymentMethod')?.addEventListener('change', function() {
+            const cardFields = document.getElementById('cardFields');
+            if (this.value === 'card') {
+                cardFields.classList.remove('hidden');
+            } else {
+                cardFields.classList.add('hidden');
+            }
+        });
+
+        
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateStep(3)) {
+                return;
+            }
+
+            if (!document.getElementById('termsAccepted').checked) {
+                alert('Debes aceptar los términos y condiciones');
+                return;
+            }
+
+            
+            const formData = {
+                id: 'REG-' + Date.now(),
+                fullName: document.getElementById('fullName').value,
+                document: document.getElementById('document').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                birthdate: document.getElementById('birthdate').value,
+                gender: document.getElementById('gender').value,
+                address: document.getElementById('address').value,
+                schoolId: document.getElementById('school').value,
+                schoolName: document.getElementById('school').options[document.getElementById('school').selectedIndex].text,
+                grade: document.getElementById('grade').value,
+                gradeName: document.getElementById('grade').options[document.getElementById('grade').selectedIndex].text,
+                guardianName: document.getElementById('guardianName').value,
+                guardianPhone: document.getElementById('guardianPhone').value,
+                guardianEmail: document.getElementById('guardianEmail').value,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                amount: 150000,
+                status: 'pending', 
+                registrationDate: new Date().toISOString(),
+                approvedBy: null,
+                approvedDate: null
+            };
+
+            
+            const registrations = JSON.parse(localStorage.getItem('studentRegistrations') || '[]');
+            registrations.push(formData);
+            localStorage.setItem('studentRegistrations', JSON.stringify(registrations));
+
+            
+            document.getElementById('registrationId').textContent = formData.id;
+            document.getElementById('successModal').classList.remove('hidden');
+        });
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSchools();
+        });
+    </script>
+
+    
+    <footer class="relative z-10 bg-white/90 backdrop-blur-lg mt-16 border-t border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                        <span class="text-2xl mr-2">🎓</span>
+                        Plataforma Escolar
+                    </h4>
+                    <p class="text-sm text-gray-600">
+                        La mejor herramienta educativa digital para estudiantes y docentes.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-3">Contáctanos</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li>📧 info@plataformaescolar.com</li>
+                        <li>📱 +57 300 123 4567</li>
+                        <li>📍 Bogotá, Colombia</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-3">Enlaces Rápidos</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="../index.html" class="text-purple-600 hover:text-purple-800">Iniciar Sesión</a></li>
+                        <li><a href="#" class="text-purple-600 hover:text-purple-800">Términos y Condiciones</a></li>
+                        <li><a href="#" class="text-purple-600 hover:text-purple-800">Política de Privacidad</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 pt-6 text-center">
+                <p class="text-sm text-gray-500">
+                    © 2025 Plataforma Escolar. Todos los derechos reservados.
+                </p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

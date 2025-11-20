@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Escolar - Panel Docente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .sidebar-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .notification-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .live-indicator {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .grade-cell {
+            transition: all 0.2s ease;
+        }
+        
+        .grade-cell:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .grade-draft { background-color: #f3f4f6; }
+        .grade-published { background-color: #dcfce7; }
+        .grade-missing { background-color: #fee2e2; }
+        
+        .floating-cta {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 50;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            min-width: 200px;
+            z-index: 100;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .view-section {
+            display: block;
+        }
+        
+        .view-section.hidden {
+            display: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .sidebar-collapsed {
+            width: 80px;
+        }
+        
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+        
+        .content-expanded {
+            margin-left: 80px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-40" style="height: 64px;">
+        <div class="flex items-center justify-between px-6 py-3 h-full">
+            
+            <div class="flex items-center space-x-4">
+                <button id="sidebarToggle" class="p-2 text-gray-600 hover:text-gray-900 lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Panel Docente</h1>
+                        <p class="text-sm text-gray-500">Plataforma Escolar</p>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="hidden md:flex items-center space-x-4 flex-1 max-w-2xl mx-8">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Buscar estudiantes, tareas, contenidos...">
+                </div>
+            </div>
+            
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="p-2 text-gray-600 hover:text-gray-900 relative">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full notification-dot"></span>
+                    </button>
+                </div>
+                
+                <button class="p-2 text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-medium text-gray-900">Prof. Carlos Mendoza</p>
+                            <p class="text-xs text-gray-500">Docente Senior</p>
+                        </div>
+                        <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium">CM</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                    </button>
+                    
+                    <div id="userMenu" class="dropdown-menu">
+                        <div class="p-2">
+                            <a href="#" class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                                <i class="fas fa-user w-4"></i>
+                                <span>Mi Perfil</span>
+                            </a>
+                            <a href="#" class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                                <i class="fas fa-clock w-4"></i>
+                                <span>Disponibilidad</span>
+                            </a>
+                            <a href="#" class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                                <i class="fas fa-cog w-4"></i>
+                                <span>Configuración</span>
+                            </a>
+                            <hr class="my-2">
+                            <a href="#" id="btnLogout" class="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded">
+                                <i class="fas fa-sign-out-alt w-4"></i>
+                                <span>Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        
+        <aside id="sidebar" class="w-64 bg-white shadow-lg fixed left-0 top-16 bottom-0 overflow-y-auto transition-all duration-300">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="sidebar-active flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium">
+                            <i class="fas fa-home"></i>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-users"></i>
+                            <span class="sidebar-text">Estudiantes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-book-open"></i>
+                            <span class="sidebar-text">Contenidos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-tasks"></i>
+                            <span class="sidebar-text">Tareas</span>
+                            <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full sidebar-text">12</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-chart-column"></i>
+                            <span class="sidebar-text">Calificaciones</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-video"></i>
+                            <span class="sidebar-text">Clase en Vivo</span>
+                            <span class="ml-auto w-2 h-2 bg-red-500 rounded-full live-indicator"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-comments"></i>
+                            <span class="sidebar-text">Mensajes</span>
+                            <span class="ml-auto w-2 h-2 bg-green-500 rounded-full"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-calendar"></i>
+                            <span class="sidebar-text">Calendario</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        
+        <main id="mainContent" class="flex-1 ml-64 p-6 transition-all duration-300">
+            
+            
+            <section data-view-id="dashboard" class="view-section">
+            
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">Dashboard Docente</h2>
+                        <p class="text-gray-600 mt-1">Gestiona tus cursos y actividades académicas</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500">Última actualización: hace 2 min</span>
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Actualizar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Estudiantes Activos</p>
+                            <p class="text-3xl font-bold text-gray-900">127</p>
+                            <p class="text-green-600 text-sm mt-1">
+                                <i class="fas fa-arrow-up"></i> +5 esta semana
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Tareas por Calificar</p>
+                            <p class="text-3xl font-bold text-gray-900">23</p>
+                            <p class="text-orange-600 text-sm mt-1">
+                                <i class="fas fa-clock"></i> 8 vencen hoy
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clipboard-check text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Promedio General</p>
+                            <p class="text-3xl font-bold text-gray-900">4.2</p>
+                            <p class="text-green-600 text-sm mt-1">
+                                <i class="fas fa-arrow-up"></i> +0.3 vs mes anterior
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-star text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Asistencia Promedio</p>
+                            <p class="text-3xl font-bold text-gray-900">89%</p>
+                            <p class="text-red-600 text-sm mt-1">
+                                <i class="fas fa-arrow-down"></i> -2% vs semana anterior
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900">Clases de Hoy</h3>
+                            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver calendario completo</button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="border border-green-200 bg-green-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">PRÓXIMA</span>
+                                            <span class="text-green-600 text-sm font-medium">En 15 minutos</span>
+                                        </div>
+                                        <h4 class="font-semibold text-gray-900 mb-1">POO - Herencia y Polimorfismo</h4>
+                                        <div class="text-sm text-gray-600 space-y-1">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-clock text-green-500"></i>
+                                                <span>14:00 - 16:00</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-users text-green-500"></i>
+                                                <span>Grado 6° (32 estudiantes)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                            <i class="fas fa-video mr-2"></i>Iniciar Clase
+                                        </button>
+                                        <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-blue-200 bg-blue-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">PROGRAMADA</span>
+                                            <span class="text-blue-600 text-sm font-medium">En 3 horas</span>
+                                        </div>
+                                        <h4 class="font-semibold text-gray-900 mb-1">Tutoría Grupal - Resolución de Dudas</h4>
+                                        <div class="text-sm text-gray-600 space-y-1">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-clock text-blue-500"></i>
+                                                <span>17:00 - 18:00</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-users text-blue-500"></i>
+                                                <span>Grado 7° (15 estudiantes)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                            Preparar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900">Tareas por Calificar</h3>
+                            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver todas</button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 border border-red-200 bg-red-50 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-exclamation text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Sistema de Gestión de Biblioteca</h4>
+                                        <p class="text-sm text-gray-600">Proyecto • Vence hoy • 18 entregas pendientes</p>
+                                    </div>
+                                </div>
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                    Calificar Ahora
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border border-orange-200 bg-orange-50 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-clock text-orange-600"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Quiz Módulo 4 - POO</h4>
+                                        <p class="text-sm text-gray-600">Evaluación • Vence en 2 días • 12 entregas pendientes</p>
+                                    </div>
+                                </div>
+                                <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                    Revisar
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-tasks text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Ejercicios de Herencia</h4>
+                                        <p class="text-sm text-gray-600">Práctica • Vence en 5 días • 8 entregas pendientes</p>
+                                    </div>
+                                </div>
+                                <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                    Ver Entregas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900">Estudiantes en Riesgo</h3>
+                            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver todos</button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 border border-red-200 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <span class="text-red-600 font-medium text-sm">AH</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Ana Herrera</h4>
+                                        <p class="text-sm text-gray-600">Progreso: 45% • Asistencia: 60% • Promedio: 2.8</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                        <i class="fas fa-message"></i>
+                                    </button>
+                                    <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border border-orange-200 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <span class="text-orange-600 font-medium text-sm">LM</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Luis Martínez</h4>
+                                        <p class="text-sm text-gray-600">Progreso: 52% • Asistencia: 75% • Promedio: 3.1</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                        <i class="fas fa-message"></i>
+                                    </button>
+                                    <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="space-y-8">
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">Resumen General</h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-600">Progreso Promedio</span>
+                                    <span class="font-medium">68%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 68%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-600">Asistencia Promedio</span>
+                                    <span class="font-medium" id="avgAttendance">--</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="avgAttendanceBar" class="bg-green-500 h-2 rounded-full" style="width: 89%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-600">Tareas Entregadas</span>
+                                    <span class="font-medium">76%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-orange-500 h-2 rounded-full" style="width: 76%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <p class="text-2xl font-bold text-gray-900">127</p>
+                                    <p class="text-sm text-gray-600">Estudiantes</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold text-gray-900">4.2</p>
+                                    <p class="text-sm text-gray-600">Promedio</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">Acciones Rápidas</h3>
+                        
+                        <div class="space-y-3">
+                            <button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg text-left hover:from-blue-600 hover:to-blue-700 transition-all card-hover">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-plus-circle text-xl"></i>
+                                    <div>
+                                        <p class="font-medium">Crear Tarea</p>
+                                        <p class="text-blue-100 text-sm">Nueva evaluación o proyecto</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg text-left hover:from-green-600 hover:to-green-700 transition-all card-hover">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-video text-xl"></i>
+                                    <div>
+                                        <p class="font-medium">Programar Clase</p>
+                                        <p class="text-green-100 text-sm">Agendar nueva sesión</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg text-left hover:from-purple-600 hover:to-purple-700 transition-all card-hover">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-bullhorn text-xl"></i>
+                                    <div>
+                                        <p class="font-medium">Enviar Anuncio</p>
+                                        <p class="text-purple-100 text-sm">Comunicar a los estudiantes</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-lg text-left hover:from-orange-600 hover:to-orange-700 transition-all card-hover">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-user-plus text-xl"></i>
+                                    <div>
+                                        <p class="font-medium">Programar Tutoría</p>
+                                        <p class="text-orange-100 text-sm">Sesión individual</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">Actividad Reciente</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-green-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Tarea calificada</p>
+                                    <p class="text-xs text-gray-500">Calculadora POO - 15 estudiantes</p>
+                                    <p class="text-xs text-gray-400">Hace 1 hora</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-video text-blue-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Clase finalizada</p>
+                                    <p class="text-xs text-gray-500">Métodos especiales - 28 asistentes</p>
+                                    <p class="text-xs text-gray-400">Hace 3 horas</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-message text-purple-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Mensaje enviado</p>
+                                    <p class="text-xs text-gray-500">Recordatorio de entrega</p>
+                                    <p class="text-xs text-gray-400">Ayer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </section>
+
+            
+            <section data-view-id="students" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Estudiantes</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-blue-600">47</div>
+                            <div class="text-gray-600 mt-2">Grado 6°</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-green-600">45</div>
+                            <div class="text-gray-600 mt-2">Grado 7°</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-purple-600">35</div>
+                            <div class="text-gray-600 mt-2">Grado 8°</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-3">
+                            <div class="flex items-center gap-3 w-full max-w-2xl">
+                                <input id="studentSearch" type="text" placeholder="Buscar estudiante..." class="border rounded-lg px-4 py-2 w-full">
+                                <select id="filterGrade" class="border rounded-lg px-4 py-2">
+                                    <option value="all">Todos los grados</option>
+                                    <option value="6">Grado 6°</option>
+                                    <option value="7">Grado 7°</option>
+                                    <option value="8">Grado 8°</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input id="attendanceDate" type="date" class="border rounded-lg px-3 py-2" />
+                                <select id="attendanceGradeSelect" class="border rounded-lg px-4 py-2">
+                                    <option value="6">Grado 6°</option>
+                                    <option value="7">Grado 7°</option>
+                                    <option value="8">Grado 8°</option>
+                                </select>
+                                <button id="btnTakeAttendance" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Tomar Asistencia</button>
+                            </div>
+                        </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estudiante</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progreso</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Promedio</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">MG</div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">María García</div>
+                                                <div class="text-sm text-gray-500">maria@escuela.edu.co</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">6°</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                                            </div>
+                                            <span class="text-sm text-gray-600">75%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.5</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Activo</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">CR</div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">Carlos Rodríguez</div>
+                                                <div class="text-sm text-gray-500">carlos@escuela.edu.co</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">7°</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div class="bg-green-600 h-2 rounded-full" style="width: 65%"></div>
+                                            </div>
+                                            <span class="text-sm text-gray-600">65%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.0</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Activo</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">AM</div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">Ana Martínez</div>
+                                                <div class="text-sm text-gray-500">ana@escuela.edu.co</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">8°</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div class="bg-purple-600 h-2 rounded-full" style="width: 85%"></div>
+                                            </div>
+                                            <span class="text-sm text-gray-600">85%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.8</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Activo</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    
+                    <div id="attendancePanel" class="mt-6 bg-white rounded-xl shadow-sm p-6 hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold">Tomar Asistencia - <span id="attendancePanelTitle">Grado 6°</span></h3>
+                            <div>
+                                <button id="btnSaveAttendance" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 mr-2">Guardar</button>
+                                <button id="btnCancelAttendance" class="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300">Cancelar</button>
+                            </div>
+                        </div>
+
+                        <div id="attendanceList" class="space-y-2 max-h-96 overflow-y-auto">
+                            
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600">
+                                <strong>Instrucciones:</strong> Marque el estado de cada estudiante. 
+                                <span class="text-green-700">✓ Presente</span> si asistió, 
+                                <span class="text-red-700">✗ Ausente</span> si no vino, 
+                                <span class="text-blue-700">📋 Justificado</span> si tiene excusa válida.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section data-view-id="contents" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Contenidos del Curso</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <button class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700">
+                        <i class="fas fa-book text-3xl mb-3"></i>
+                        <div class="font-bold">Grado 6°</div>
+                        <div class="text-sm mt-2">4 Períodos • 40 Semanas</div>
+                    </button>
+                    <button class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700">
+                        <i class="fas fa-book text-3xl mb-3"></i>
+                        <div class="font-bold">Grado 7°</div>
+                        <div class="text-sm mt-2">4 Períodos • 40 Semanas</div>
+                    </button>
+                    <button class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700">
+                        <i class="fas fa-book text-3xl mb-3"></i>
+                        <div class="font-bold">Grado 8°</div>
+                        <div class="text-sm mt-2">4 Períodos • 40 Semanas</div>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-xl font-bold mb-4">Períodos Académicos</h3>
+                    <div class="space-y-4">
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-lg">Período 1</h4>
+                                    <p class="text-gray-600 text-sm">10 Semanas • Fundamentos de Python</p>
+                                </div>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-edit mr-2"></i>Gestionar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-lg">Período 2</h4>
+                                    <p class="text-gray-600 text-sm">10 Semanas • Estructuras de Datos</p>
+                                </div>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-edit mr-2"></i>Gestionar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-lg">Período 3</h4>
+                                    <p class="text-gray-600 text-sm">10 Semanas • Programación Avanzada</p>
+                                </div>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-edit mr-2"></i>Gestionar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-lg">Período 4</h4>
+                                    <p class="text-gray-600 text-sm">10 Semanas • Proyecto Final</p>
+                                </div>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-edit mr-2"></i>Gestionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section data-view-id="tasks" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Tareas y Evaluaciones</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold text-orange-600">23</div>
+                                <div class="text-gray-600 mt-2">Por Calificar</div>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-orange-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold text-green-600">156</div>
+                                <div class="text-gray-600 mt-2">Calificadas</div>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold text-blue-600">8</div>
+                                <div class="text-gray-600 mt-2">Próximas</div>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">Tareas Pendientes de Calificar</h3>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-plus mr-2"></i>Nueva Tarea
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="border border-red-200 bg-red-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-medium">URGENTE</span>
+                                        <span class="text-gray-600 text-sm">Vence hoy</span>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Proyecto POO - Sistema de Biblioteca</h4>
+                                    <p class="text-gray-600 text-sm">Grado 7° • 18 entregas pendientes de calificar</p>
+                                </div>
+                                <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                    Calificar Ahora
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="border border-orange-200 bg-orange-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded font-medium">PENDIENTE</span>
+                                        <span class="text-gray-600 text-sm">Vence en 2 días</span>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Quiz Módulo 4 - Herencia</h4>
+                                    <p class="text-gray-600 text-sm">Grado 6° • 12 entregas pendientes de calificar</p>
+                                </div>
+                                <button class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                                    Revisar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="border rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">COMPLETADA</span>
+                                        <span class="text-gray-600 text-sm">Calificada hace 2 horas</span>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Tarea - Calculadora POO</h4>
+                                    <p class="text-gray-600 text-sm">Grado 8° • 35/35 calificadas • Promedio: 4.3</p>
+                                </div>
+                                <button class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                                    Ver Resultados
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section data-view-id="grades" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Calificaciones</h2>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold">Resumen de Calificaciones</h3>
+                            <p class="text-gray-600">Promedios por grado y período</p>
+                        </div>
+                        <select class="border rounded-lg px-4 py-2">
+                            <option>Período 1</option>
+                            <option>Período 2</option>
+                            <option>Período 3</option>
+                            <option>Período 4</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-6 bg-blue-50 rounded-lg">
+                            <div class="text-4xl font-bold text-blue-600">4.3</div>
+                            <div class="text-gray-600 mt-2">Grado 6°</div>
+                            <div class="text-sm text-gray-500 mt-1">47 estudiantes</div>
+                        </div>
+                        <div class="text-center p-6 bg-green-50 rounded-lg">
+                            <div class="text-4xl font-bold text-green-600">4.0</div>
+                            <div class="text-gray-600 mt-2">Grado 7°</div>
+                            <div class="text-sm text-gray-500 mt-1">45 estudiantes</div>
+                        </div>
+                        <div class="text-center p-6 bg-purple-50 rounded-lg">
+                            <div class="text-4xl font-bold text-purple-600">4.5</div>
+                            <div class="text-gray-600 mt-2">Grado 8°</div>
+                            <div class="text-sm text-gray-500 mt-1">35 estudiantes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-xl font-bold mb-4">Distribución de Calificaciones</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Excelente (4.5 - 5.0)</span>
+                                <span class="font-bold">45%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-green-500 h-3 rounded-full" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Bueno (4.0 - 4.4)</span>
+                                <span class="font-bold">32%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-blue-500 h-3 rounded-full" style="width: 32%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Aceptable (3.0 - 3.9)</span>
+                                <span class="font-bold">18%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-yellow-500 h-3 rounded-full" style="width: 18%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Bajo (< 3.0)</span>
+                                <span class="font-bold">5%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-red-500 h-3 rounded-full" style="width: 5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section data-view-id="live" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Clase en Vivo</h2>
+                
+                <div class="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl p-8 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Clase Activa Ahora</h3>
+                            <p class="text-red-100">POO - Herencia y Polimorfismo • Grado 6°</p>
+                            <p class="text-red-100 text-sm mt-2">32 estudiantes conectados</p>
+                        </div>
+                        <button class="bg-white text-red-600 px-6 py-3 rounded-lg font-bold hover:bg-red-50">
+                            <i class="fas fa-video mr-2"></i>Unirse
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold mb-4">Próximas Clases</h3>
+                        <div class="space-y-4">
+                            <div class="border border-blue-200 bg-blue-50 rounded-lg p-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">HOY</span>
+                                    <span class="text-gray-600 text-sm">17:00 - 18:00</span>
+                                </div>
+                                <h4 class="font-bold">Tutoría Grupal</h4>
+                                <p class="text-gray-600 text-sm">Grado 7° • Resolución de Dudas</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded">MAÑANA</span>
+                                    <span class="text-gray-600 text-sm">14:00 - 16:00</span>
+                                </div>
+                                <h4 class="font-bold">Estructuras de Datos</h4>
+                                <p class="text-gray-600 text-sm">Grado 8° • Listas y Diccionarios</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold mb-4">Acciones Rápidas</h3>
+                        <div class="space-y-3">
+                            <button class="w-full bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 text-left">
+                                <i class="fas fa-video mr-3"></i>Iniciar Clase Inmediata
+                            </button>
+                            <button class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 text-left">
+                                <i class="fas fa-calendar-plus mr-3"></i>Programar Nueva Clase
+                            </button>
+                            <button class="w-full bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 text-left">
+                                <i class="fas fa-history mr-3"></i>Ver Grabaciones
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section data-view-id="messages" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Mensajes</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h3 class="font-bold mb-4">Conversaciones</h3>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-blue-50 border-l-4 border-blue-600 rounded cursor-pointer">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-bold text-sm">María García</span>
+                                    <span class="text-xs text-gray-500">10:30</span>
+                                </div>
+                                <p class="text-xs text-gray-600 truncate">Profesor, tengo una duda sobre...</p>
+                                <span class="inline-block mt-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">2</span>
+                            </div>
+                            <div class="p-3 hover:bg-gray-50 rounded cursor-pointer">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-bold text-sm">Carlos Rodríguez</span>
+                                    <span class="text-xs text-gray-500">Ayer</span>
+                                </div>
+                                <p class="text-xs text-gray-600 truncate">Gracias por la explicación</p>
+                            </div>
+                            <div class="p-3 hover:bg-gray-50 rounded cursor-pointer">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-bold text-sm">Ana Martínez</span>
+                                    <span class="text-xs text-gray-500">Ayer</span>
+                                </div>
+                                <p class="text-xs text-gray-600 truncate">¿Puedo enviar la tarea mañana?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3 bg-white rounded-xl shadow-sm flex flex-col" style="height: 600px;">
+                        <div class="p-4 border-b">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">MG</div>
+                                <div>
+                                    <h4 class="font-bold">María García</h4>
+                                    <p class="text-xs text-gray-500">Grado 6° • En línea</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 p-4 overflow-y-auto">
+                            <div class="space-y-4">
+                                <div class="flex justify-start">
+                                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                                        <p class="text-sm">Profesor, tengo una duda sobre la herencia en POO</p>
+                                        <span class="text-xs text-gray-500">10:30</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <div class="bg-blue-600 text-white rounded-lg p-3 max-w-xs">
+                                        <p class="text-sm">Claro María, ¿qué te gustaría saber?</p>
+                                        <span class="text-xs text-blue-100">10:32</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-start">
+                                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                                        <p class="text-sm">¿Cómo funciona el método super()?</p>
+                                        <span class="text-xs text-gray-500">10:33</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border-t">
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="Escribe un mensaje..." class="flex-1 border rounded-lg px-4 py-2">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section data-view-id="calendar" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">Calendario Académico</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-blue-600">12</div>
+                            <div class="text-gray-600 mt-2">Clases Esta Semana</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-green-600">5</div>
+                            <div class="text-gray-600 mt-2">Evaluaciones</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-purple-600">8</div>
+                            <div class="text-gray-600 mt-2">Tutorías</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold mb-4">Eventos de Hoy</h3>
+                        <div class="space-y-3">
+                            <div class="border-l-4 border-green-500 bg-green-50 p-3 rounded">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-green-600 text-white text-xs px-2 py-1 rounded">14:00</span>
+                                    <span class="font-bold">Clase POO</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Grado 6° • Herencia y Polimorfismo</p>
+                            </div>
+                            <div class="border-l-4 border-blue-500 bg-blue-50 p-3 rounded">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">17:00</span>
+                                    <span class="font-bold">Tutoría Grupal</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Grado 7° • Resolución de Dudas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold mb-4">Próximos Eventos</h3>
+                        <div class="space-y-3">
+                            <div class="border-l-4 border-purple-500 bg-purple-50 p-3 rounded">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-purple-600 text-white text-xs px-2 py-1 rounded">MAÑANA</span>
+                                    <span class="font-bold">Evaluación</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Grado 8° • Quiz Módulo 4</p>
+                            </div>
+                            <div class="border-l-4 border-orange-500 bg-orange-50 p-3 rounded">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-orange-600 text-white text-xs px-2 py-1 rounded">VIERNES</span>
+                                    <span class="font-bold">Entrega Proyecto</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Todos los grados • Proyecto POO</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    
+    <div class="floating-cta">
+        <div class="relative">
+            <button id="floatingBtn" class="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center">
+                <i class="fas fa-plus text-xl"></i>
+            </button>
+            
+            <div id="floatingMenu" class="dropdown-menu bottom-16 right-0">
+                <div class="p-2">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                        <i class="fas fa-video text-blue-600 w-5"></i>
+                        <span>Crear Clase</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                        <i class="fas fa-tasks text-green-600 w-5"></i>
+                        <span>Nueva Tarea</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                        <i class="fas fa-bullhorn text-purple-600 w-5"></i>
+                        <span>Enviar Anuncio</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                        <i class="fas fa-user-plus text-orange-600 w-5"></i>
+                        <span>Programar Tutoría</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="toast" class="fixed bottom-4 left-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-check-circle"></i>
+            <span>Acción completada exitosamente</span>
+        </div>
+    </div>
+
+    <script>
+        
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || currentUser.role !== 'teacher') {
+            window.location.href = '../../index.html';
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnLogout = document.getElementById('btnLogout');
+            if (btnLogout) {
+                btnLogout.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('currentUser');
+                    window.location.href = '../../index.html';
+                });
+            }
+        });
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            initializeDropdowns();
+            simulateRealTimeUpdates();
+        });
+
+        function initializeEventListeners() {
+            
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('sidebar-collapsed');
+                    mainContent.classList.toggle('content-expanded');
+                });
+            }
+
+            
+            const navLinks = document.querySelectorAll('aside a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    
+                    navLinks.forEach(l => l.classList.remove('sidebar-active'));
+                    
+                    
+                    this.classList.add('sidebar-active');
+                    
+                    
+                    const href = this.getAttribute('href');
+                    let viewId = 'dashboard';
+                    
+                    
+                    const text = this.querySelector('.sidebar-text').textContent.trim();
+                    const viewMap = {
+                        'Dashboard': 'dashboard',
+                        'Estudiantes': 'students',
+                        'Contenidos': 'contents',
+                        'Tareas': 'tasks',
+                        'Calificaciones': 'grades',
+                        'Clase en Vivo': 'live',
+                        'Mensajes': 'messages',
+                        'Calendario': 'calendar'
+                    };
+                    
+                    viewId = viewMap[text] || 'dashboard';
+                    
+                    
+                    document.querySelectorAll('.view-section').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+                    
+                    
+                    const targetSection = document.querySelector(`[data-view-id="${viewId}"]`);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                    
+                    showToast('Navegando a ' + text);
+                });
+            });
+
+            
+            const buttons = document.querySelectorAll('button:not(#userMenuBtn):not(#floatingBtn):not(#sidebarToggle)');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const buttonText = this.textContent.trim() || 'Acción';
+                    showToast(`${buttonText} - Funcionalidad en desarrollo`);
+                });
+            });
+        }
+
+        function initializeDropdowns() {
+            
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenu = document.getElementById('userMenu');
+            
+            if (userMenuBtn && userMenu) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('show');
+                });
+            }
+
+            
+            const floatingBtn = document.getElementById('floatingBtn');
+            const floatingMenu = document.getElementById('floatingMenu');
+            
+            if (floatingBtn && floatingMenu) {
+                floatingBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    floatingMenu.classList.toggle('show');
+                });
+            }
+
+            
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            });
+
+            
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+        }
+
+        
+        const studentsData = [
+            { name: 'María García', email: 'maria@escuela.edu.co', grade: 6, initials: 'MG' },
+            { name: 'Pedro López', email: 'pedro@escuela.edu.co', grade: 6, initials: 'PL' },
+            { name: 'Laura Ramírez', email: 'laura@escuela.edu.co', grade: 6, initials: 'LR' },
+            { name: 'Diego Torres', email: 'diego@escuela.edu.co', grade: 6, initials: 'DT' },
+            { name: 'Sofia Morales', email: 'sofia@escuela.edu.co', grade: 6, initials: 'SM' },
+            { name: 'Carlos Rodríguez', email: 'carlos@escuela.edu.co', grade: 7, initials: 'CR' },
+            { name: 'Valentina Pérez', email: 'valentina@escuela.edu.co', grade: 7, initials: 'VP' },
+            { name: 'Andrés Silva', email: 'andres@escuela.edu.co', grade: 7, initials: 'AS' },
+            { name: 'Camila Gómez', email: 'camila@escuela.edu.co', grade: 7, initials: 'CG' },
+            { name: 'Ana Martínez', email: 'ana@escuela.edu.co', grade: 8, initials: 'AM' },
+            { name: 'Santiago Cruz', email: 'santiago@escuela.edu.co', grade: 8, initials: 'SC' },
+            { name: 'Daniela Vargas', email: 'daniela@escuela.edu.co', grade: 8, initials: 'DV' },
+            { name: 'Mateo Herrera', email: 'mateo@escuela.edu.co', grade: 8, initials: 'MH' }
+        ];
+
+        function getAttendanceStore() {
+            try {
+                const raw = localStorage.getItem('attendance');
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveAttendanceStore(store) {
+            localStorage.setItem('attendance', JSON.stringify(store));
+        }
+
+        function getAttendanceForDateGrade(dateStr, grade) {
+            const store = getAttendanceStore();
+            if (store[dateStr] && store[dateStr][grade]) return store[dateStr][grade];
+            return {};
+        }
+
+        function saveAttendanceForDateGrade(dateStr, grade, attendanceMap) {
+            const store = getAttendanceStore();
+            store[dateStr] = store[dateStr] || {};
+            store[dateStr][grade] = attendanceMap;
+            saveAttendanceStore(store);
+        }
+
+        
+        function renderAttendanceList(grade, dateStr) {
+            const listEl = document.getElementById('attendanceList');
+            const titleEl = document.getElementById('attendancePanelTitle');
+            if (!listEl) return;
+            titleEl.textContent = `Grado ${grade}° - ${dateStr}`;
+            listEl.innerHTML = '';
+
+            const attendance = getAttendanceForDateGrade(dateStr, grade);
+            const students = studentsData.filter(s => s.grade === Number(grade));
+            
+            if (students.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-500 text-center py-4">No hay estudiantes en este grado</p>';
+                return;
+            }
+
+            students.forEach(s => {
+                const status = attendance[s.email] || 'absent';
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-3 border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold">${s.initials}</div>
+                        <div>
+                            <div class="text-sm font-medium">${s.name}</div>
+                            <div class="text-xs text-gray-500">${s.email}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="attendance-${s.email}" value="present" class="attendance-radio" data-email="${s.email}" ${status === 'present' ? 'checked' : ''} />
+                            <span class="ml-1 text-sm text-green-700">✓ Presente</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="attendance-${s.email}" value="absent" class="attendance-radio" data-email="${s.email}" ${status === 'absent' ? 'checked' : ''} />
+                            <span class="ml-1 text-sm text-red-700">✗ Ausente</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="attendance-${s.email}" value="justified" class="attendance-radio" data-email="${s.email}" ${status === 'justified' ? 'checked' : ''} />
+                            <span class="ml-1 text-sm text-blue-700">📋 Justificado</span>
+                        </label>
+                    </div>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        
+        function openAttendancePanel(grade) {
+            const dateInput = document.getElementById('attendanceDate');
+            const dateStr = dateInput && dateInput.value ? dateInput.value : (new Date()).toISOString().slice(0,10);
+            const panel = document.getElementById('attendancePanel');
+            const gradeSelect = document.getElementById('attendanceGradeSelect');
+            if (gradeSelect) gradeSelect.value = grade;
+            panel.classList.remove('hidden');
+            renderAttendanceList(grade, dateStr);
+        }
+
+        
+        function handleSaveAttendance() {
+            const dateInput = document.getElementById('attendanceDate');
+            const dateStr = dateInput && dateInput.value ? dateInput.value : (new Date()).toISOString().slice(0,10);
+            const grade = document.getElementById('attendanceGradeSelect').value;
+            const radios = document.querySelectorAll('.attendance-radio:checked');
+            const attendanceMap = {};
+            
+            radios.forEach(radio => {
+                const email = radio.getAttribute('data-email');
+                const status = radio.value;
+                attendanceMap[email] = status;
+            });
+            
+            
+            const students = studentsData.filter(s => s.grade === Number(grade));
+            students.forEach(s => {
+                if (!attendanceMap[s.email]) {
+                    attendanceMap[s.email] = 'absent';
+                }
+            });
+            
+            saveAttendanceForDateGrade(dateStr, grade, attendanceMap);
+            
+            
+            let present = 0, absent = 0, justified = 0;
+            Object.values(attendanceMap).forEach(v => {
+                if (v === 'present') present++;
+                else if (v === 'justified') justified++;
+                else absent++;
+            });
+            
+            showToast(`Asistencia guardada: ${present} presentes, ${absent} ausentes, ${justified} justificados`);
+            document.getElementById('attendancePanel').classList.add('hidden');
+            
+            updateAverageAttendance();
+        }
+
+        function handleCancelAttendance() {
+            document.getElementById('attendancePanel').classList.add('hidden');
+        }
+
+        (function initAttendanceControls(){
+            document.addEventListener('DOMContentLoaded', function(){
+                const btn = document.getElementById('btnTakeAttendance');
+                const btnSave = document.getElementById('btnSaveAttendance');
+                const btnCancel = document.getElementById('btnCancelAttendance');
+                const gradeSelect = document.getElementById('attendanceGradeSelect');
+                const dateInput = document.getElementById('attendanceDate');
+
+                if (dateInput && !dateInput.value) dateInput.value = (new Date()).toISOString().slice(0,10);
+
+                if (btn) btn.addEventListener('click', function(){
+                    const grade = gradeSelect ? gradeSelect.value : '6';
+                    openAttendancePanel(grade);
+                });
+                if (btnSave) btnSave.addEventListener('click', handleSaveAttendance);
+                if (btnCancel) btnCancel.addEventListener('click', handleCancelAttendance);
+            });
+        })();
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                const span = toast.querySelector('span') || toast;
+                if (span) span.textContent = message;
+                toast.classList.remove('translate-y-full');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-full');
+                }, 3000);
+            }
+        }
+
+        function simulateRealTimeUpdates() {
+            setInterval(() => {
+                const badges = document.querySelectorAll('.notification-dot');
+                badges.forEach(badge => {
+                    badge.style.opacity = badge.style.opacity === '0.3' ? '1' : '0.3';
+                });
+            }, 2000);
+
+            setInterval(() => {
+                updateRandomStats();
+            }, 30000);
+        }
+
+        function updateRandomStats() {
+            const statElements = document.querySelectorAll('.text-3xl.font-bold.text-gray-900');
+            statElements.forEach(element => {
+                if (element.textContent.includes('%')) {
+                    const currentValue = parseInt(element.textContent);
+                    const change = Math.random() > 0.5 ? 1 : -1;
+                    const newValue = Math.max(0, Math.min(100, currentValue + change));
+                    element.textContent = newValue + '%';
+                }
+            });
+        }
+
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('[style*="width:"]');
+            progressBars.forEach(bar => {
+                const targetWidth = bar.style.width;
+                bar.style.width = '0%';
+                bar.style.transition = 'width 1s ease-in-out';
+                
+                setTimeout(() => {
+                    bar.style.width = targetWidth;
+                }, 100);
+            });
+        }
+
+        setTimeout(animateProgressBars, 500);
+
+        function updateAverageAttendance() {
+            const store = getAttendanceStore();
+            let totalDays = 0;
+            let totalPresent = 0;
+            let totalStudents = 0;
+
+            for (const date in store) {
+                for (const grade in store[date]) {
+                    const gradeData = store[date][grade];
+                    const studentsInGrade = studentsData.filter(s => s.grade === Number(grade)).length;
+                    
+                    if (studentsInGrade > 0) {
+                        totalDays++;
+                        totalStudents += studentsInGrade;
+                        
+                        for (const email in gradeData) {
+                            if (gradeData[email] === 'present') {
+                                totalPresent++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            const avgPercentage = totalStudents > 0 ? Math.round((totalPresent / totalStudents) * 100) : 0;
+
+            const avgAttendanceEl = document.getElementById('avgAttendance');
+            const avgAttendanceBar = document.getElementById('avgAttendanceBar');
+            
+            if (avgAttendanceEl) {
+                avgAttendanceEl.textContent = avgPercentage + '%';
+            }
+            if (avgAttendanceBar) {
+                avgAttendanceBar.style.width = avgPercentage + '%';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAverageAttendance();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'981c1b8642b7f77e',t:'MTc1ODMxNjYyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

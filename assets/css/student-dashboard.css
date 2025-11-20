@@ -1,0 +1,25 @@
+:root{--p1:#7C3AED;--p2:#22D3EE;--p3:#F59E0B;--p4:#10B981;--bg:#F8FAFF;--ink:#0F172A;--muted:#64748B}
+*{font-family:'Fredoka','Inter',system-ui,Segoe UI,Roboto;letter-spacing:.1px}
+body{background:radial-gradient(1200px 600px at -10% -10%,#E9D5FF 0%,transparent 60%),radial-gradient(1200px 600px at 110% 10%,#CCFBF1 0%,transparent 60%),var(--bg);color:var(--ink)}
+.clouds::before,.clouds::after{content:"";position:fixed;z-index:-1;opacity:.25;filter:blur(2px);background:url('data:image/svg+xml;utf8,<svg viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg"><g fill="%23ffffff"><ellipse cx="60" cy="40" rx="60" ry="28"/><ellipse cx="120" cy="35" rx="50" ry="25"/><ellipse cx="180" cy="42" rx="70" ry="30"/></g></svg>') no-repeat center/contain;width:340px;height:100px;animation:floatcloud 40s linear infinite}
+.clouds::before{top:80px;left:-120px}.clouds::after{top:220px;right:-120px;animation-duration:55s}@keyframes floatcloud{from{transform:translateX(0)}to{transform:translateX(140%)}}
+.card{background:#fff;border:2px solid #EEF2FF;border-radius:24px;box-shadow:0 10px 26px rgba(124,58,237,.08)}
+.chip{border-radius:999px;padding:.25rem .65rem;font-weight:700}
+.btn{border-radius:16px;font-weight:700;padding:.7rem 1rem}
+.btn-big{border-radius:18px;padding:.9rem 1.2rem;font-size:1rem}
+.btn-primary{background:linear-gradient(135deg,var(--p1),#4F46E5);color:#fff}.btn-primary:hover{filter:brightness(1.05)}
+.btn-soft{background:#F1F5FF;color:#4338CA}.btn-soft:hover{background:#E5E7FF}
+.btn-success{background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff}
+.btn-danger{background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff}
+.sidebar-active{background:linear-gradient(135deg,#A78BFA,#60A5FA);color:#fff!important}
+.sidebar-link{border-radius:14px;font-weight:700}
+.pillbar{background:#E0E7FF;height:14px;border-radius:999px;overflow:hidden}.pillbar>span{display:block;height:100%;background:linear-gradient(90deg,#34D399,#10B981);border-radius:999px}
+.sticker{transform:rotate(-2deg)}.wobble{animation:wobble 2.2s ease-in-out infinite;transform-origin:center}@keyframes wobble{0%,100%{transform:rotate(0)}50%{transform:rotate(-6deg)}}
+.notif-dot{animation:ping 1.2s infinite}@keyframes ping{0%{transform:scale(.9);opacity:.9}70%{transform:scale(1.15);opacity:.3}100%{transform:scale(.9);opacity:.9}}
+.kids-card{border-radius:22px;border:2px dashed #E9D5FF}
+.kids-header{background:linear-gradient(90deg,#F0ABFC,#93C5FD);color:#111}
+.kids-tab{border-radius:999px;background:#F3F4F6;padding:.45rem .8rem;font-weight:700}.kids-tab.active{background:#4F46E5;color:#fff}
+.kids-cta{border-radius:14px;font-weight:800;color:#fff}
+.course-card{min-height:220px;display:flex;flex-direction:column;justify-content:space-between}@media(min-width:1024px){.course-card{min-height:260px}}
+.att-cal{display:block;width:100%}.att-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.att-cell{aspect-ratio:1/1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#0f172a}.att-cell.present{background:linear-gradient(135deg,#10B981,#34D399);color:#fff}.att-cell.absent{background:linear-gradient(135deg,#F87171,#EF4444);color:#fff}.att-cell.empty{background:#F1F5F9;color:#94A3B8}.att-legend{display:flex;gap:8px;align-items:center;margin-top:8px}.att-legend .dot{width:14px;height:14px;border-radius:4px}.att-legend .dot.present{background:linear-gradient(135deg,#10B981,#34D399)}.att-legend .dot.absent{background:linear-gradient(135deg,#F87171,#EF4444)}.att-month{font-weight:700;margin-bottom:6px}#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:70}#toast{z-index:80}:focus-visible{outline:3px solid #60A5FA;outline-offset:2px;border-radius:14px}*{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}body{font-weight:400;color:#0f172a;font-size:15.5px;line-height:1.62}h1,h2,h3,h4,h5,h6,.text-xl,.text-lg,.font-semibold{font-weight:600}strong,b{font-weight:600}.kids-title{font-weight:700}.navlink,.btn,.book-btn,.kids-btn{font-weight:600}
+@keyframes wobble{0%,100%{transform:rotate(0)}50%{transform:rotate(-6deg)}}
