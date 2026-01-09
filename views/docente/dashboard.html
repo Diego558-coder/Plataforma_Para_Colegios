@@ -1326,8 +1326,19 @@
     <script>
         
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (!currentUser || currentUser.role !== 'teacher') {
+        if (!currentUser || (currentUser.role || '').toUpperCase() !== 'TEACHER') {
             window.location.href = '../../index.html';
+        }
+
+        const API_BASE = 'http://localhost:4000/api';
+        async function apiFetch(path, options = {}) {
+            const headers = options.headers || {};
+            if (currentUser?.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+            headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+            const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+            if (!res.ok) throw new Error(`API ${res.status}`);
+            if (res.status === 204) return null;
+            return res.json();
         }
 
         
@@ -1347,7 +1358,255 @@
             initializeEventListeners();
             initializeDropdowns();
             simulateRealTimeUpdates();
+            // Forzar a vista 100% datos reales: limpiar todo y construir solo bloques API
+            resetMainToApiOnly();
+            addRefreshButton();
+            loadTeacherAssignments();
         });
+
+        async function loadTeacherAssignments() {
+            try {
+                const data = await apiFetch('/assignments/mine');
+                renderTeacherAssignments(data || []);
+                renderTeacherStudents(data || []);
+            } catch (err) {
+                console.warn('No se pudieron cargar asignaciones de API', err);
+            }
+        }
+
+        function renderTeacherAssignments(list) {
+            const main = document.getElementById('mainContent');
+            if (!main) return;
+            let box = document.getElementById('apiAssignments');
+            if (!box) {
+                box = document.createElement('section');
+                box.id = 'apiAssignments';
+                box.className = 'bg-white shadow rounded-2xl p-6 mb-6';
+                main.appendChild(box);
+            }
+            if (!list.length) {
+                box.innerHTML = '<p class="text-sm text-gray-500">Sin asignaciones aún.</p>';
+                return;
+            }
+            const html = `
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-xs text-gray-500">Datos en vivo</p>
+                        <h3 class="text-lg font-bold">Asignaciones (API)</h3>
+                    </div>
+                </div>
+                <div class="divide-y">
+                    ${list.map(item => `
+                        <div class="py-3 flex items-start justify-between">
+                            <div>
+                                <p class="font-semibold text-gray-900">${item.title || 'Asignación'}</p>
+                                ${item.dueDate ? `<p class="text-xs text-gray-500">Vence: ${new Date(item.dueDate).toLocaleDateString('es-CO')}</p>` : ''}
+                                <p class="text-xs text-gray-500">${item.students?.length || 0} estudiantes</p>
+                            </div>
+                            <div class="text-right text-xs text-gray-600">
+                                ${item.description || ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            box.innerHTML = html;
+        }
+
+        // Renderiza lista real de estudiantes del docente a partir de sus asignaciones
+        function renderTeacherStudents(assignments) {
+            const main = document.getElementById('mainContent');
+            if (!main) return;
+            let box = document.getElementById('apiStudents');
+            if (!box) {
+                box = document.createElement('section');
+                box.id = 'apiStudents';
+                box.className = 'bg-white shadow rounded-2xl p-6 mb-6';
+                main.appendChild(box);
+            }
+
+            // Unificar estudiantes únicos de todas las asignaciones
+            const map = new Map();
+            (assignments || []).forEach(a => {
+                (a.students || []).forEach(st => {
+                    if (st && st.id && !map.has(st.id)) {
+                        map.set(st.id, st);
+                    }
+                });
+            });
+            const students = Array.from(map.values());
+
+            if (!students.length) {
+                box.innerHTML = '<p class="text-sm text-gray-500">Sin estudiantes asignados todavía.</p>';
+                return;
+            }
+
+            const html = `
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-xs text-gray-500">Datos en vivo</p>
+                        <h3 class="text-lg font-bold">Mis estudiantes (API)</h3>
+                    </div>
+                    <span class="text-xs text-gray-500">Total: ${students.length}</span>
+                </div>
+                <div class="divide-y">
+                    ${students.map(s => `
+                        <div class="py-3 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="text-blue-700 font-semibold">${(s.name || s.email || '?').substring(0,2).toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">${s.name || 'Estudiante'}</p>
+                                    <p class="text-xs text-gray-500">${s.email || ''}</p>
+                                </div>
+                            </div>
+                            <div class="text-right text-xs text-gray-600">
+                                <span class="px-2 py-1 rounded bg-green-50 text-green-600">Asignado</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            box.innerHTML = html;
+        }
+
+        // Reemplaza el contenido del main para mostrar SOLO datos del API
+        function resetMainToApiOnly() {
+            const main = document.getElementById('mainContent');
+            if (!main) return;
+            // Limpia por completo el contenido existente
+            main.innerHTML = '';
+            // Título mínimo
+            const header = document.createElement('div');
+            header.className = 'flex items-center justify-between mb-4';
+            header.innerHTML = `
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Panel Docente</h2>
+                    <p class="text-sm text-gray-500">Datos en vivo desde el API</p>
+                </div>
+                <div id="apiToolbar" class="flex items-center"></div>
+            `;
+            main.appendChild(header);
+
+            // Acciones rápidas: crear contenido y tarea
+            const actions = document.createElement('div');
+            actions.className = 'flex gap-2 mb-4';
+            actions.innerHTML = `
+                <button id="btnNewContent" class="px-3 py-2 text-sm rounded bg-purple-600 text-white hover:bg-purple-700">Nuevo Contenido</button>
+                <button id="btnNewTask" class="px-3 py-2 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700">Nueva Tarea</button>
+            `;
+            main.appendChild(actions);
+
+            // Modales de creación
+            const modals = document.createElement('div');
+            modals.innerHTML = `
+                <dialog id="modalContent" class="rounded-xl p-0 w-full max-w-md">
+                  <form id="formContent" class="p-6 space-y-3">
+                    <h3 class="text-lg font-bold">Crear Contenido</h3>
+                    <input name="title" placeholder="Título" class="w-full border rounded px-3 py-2" required />
+                    <textarea name="description" placeholder="Descripción" class="w-full border rounded px-3 py-2"></textarea>
+                    <select name="scope" class="w-full border rounded px-3 py-2"><option value="course">Curso</option><option value="global">Global (requiere aprobación)</option></select>
+                    <div class="flex gap-2 justify-end">
+                      <button type="button" id="cancelContent" class="px-3 py-2 rounded bg-gray-200">Cancelar</button>
+                      <button type="submit" class="px-3 py-2 rounded bg-purple-600 text-white">Crear</button>
+                    </div>
+                  </form>
+                </dialog>
+                <dialog id="modalTask" class="rounded-xl p-0 w-full max-w-md">
+                  <form id="formTask" class="p-6 space-y-3">
+                    <h3 class="text-lg font-bold">Crear Tarea</h3>
+                    <input name="title" placeholder="Título" class="w-full border rounded px-3 py-2" required />
+                    <textarea name="description" placeholder="Descripción" class="w-full border rounded px-3 py-2"></textarea>
+                    <input name="dueDate" type="date" class="w-full border rounded px-3 py-2" />
+                    <div class="flex gap-2 justify-end">
+                      <button type="button" id="cancelTask" class="px-3 py-2 rounded bg-gray-200">Cancelar</button>
+                      <button type="submit" class="px-3 py-2 rounded bg-indigo-600 text-white">Crear</button>
+                    </div>
+                  </form>
+                </dialog>
+            `;
+            main.appendChild(modals);
+
+            // Eventos
+            const btnNewContent = actions.querySelector('#btnNewContent');
+            const btnNewTask = actions.querySelector('#btnNewTask');
+            const modalContent = modals.querySelector('#modalContent');
+            const modalTask = modals.querySelector('#modalTask');
+            const formContent = modals.querySelector('#formContent');
+            const formTask = modals.querySelector('#formTask');
+            const cancelContent = modals.querySelector('#cancelContent');
+            const cancelTask = modals.querySelector('#cancelTask');
+
+            btnNewContent?.addEventListener('click', () => modalContent.showModal());
+            btnNewTask?.addEventListener('click', () => modalTask.showModal());
+            cancelContent?.addEventListener('click', () => modalContent.close());
+            cancelTask?.addEventListener('click', () => modalTask.close());
+
+            formContent?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fd = new FormData(formContent);
+                const payload = {
+                    title: fd.get('title'),
+                    description: fd.get('description'),
+                    scope: fd.get('scope') || 'course',
+                    status: fd.get('scope') === 'global' ? 'pendingApproval' : 'draft'
+                };
+                try {
+                    await apiFetch('/contents', { method: 'POST', body: JSON.stringify(payload) });
+                    modalContent.close();
+                    showToast('Contenido creado');
+                } catch (err) {
+                    alert('Error al crear contenido');
+                }
+            });
+
+            formTask?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fd = new FormData(formTask);
+                const payload = {
+                    title: fd.get('title'),
+                    description: fd.get('description'),
+                    dueDate: fd.get('dueDate') || null,
+                    status: 'draft'
+                };
+                try {
+                    await apiFetch('/tasks', { method: 'POST', body: JSON.stringify(payload) });
+                    modalTask.close();
+                    showToast('Tarea creada');
+                    await loadTeacherAssignments();
+                } catch (err) {
+                    alert('Error al crear tarea');
+                }
+            });
+        }
+
+        // Agrega botón de refresco para recargar datos en vivo
+        function addRefreshButton() {
+            const main = document.getElementById('mainContent') || document.body;
+            if (!main) return;
+            let bar = document.getElementById('apiToolbar');
+            if (!bar) {
+                bar = document.createElement('div');
+                bar.id = 'apiToolbar';
+                bar.className = 'flex items-center justify-end mb-4';
+                main.prepend(bar);
+            }
+            const btn = document.createElement('button');
+            btn.className = 'px-3 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700';
+            btn.textContent = 'Actualizar datos';
+            btn.addEventListener('click', async () => {
+                btn.disabled = true; btn.textContent = 'Actualizando...';
+                try {
+                    const data = await apiFetch('/assignments/mine');
+                    renderTeacherAssignments(data || []);
+                    renderTeacherStudents(data || []);
+                } catch (e) {
+                    alert('No fue posible actualizar: ' + (e.message || e));
+                } finally {
+                    btn.disabled = false; btn.textContent = 'Actualizar datos';
+                }
+            });
+            if (!bar.querySelector('button')) bar.appendChild(btn);
+        }
 
         function initializeEventListeners() {
             

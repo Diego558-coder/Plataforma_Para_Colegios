@@ -149,6 +149,13 @@
                         <p class="text-xs sm:text-sm text-gray-600 font-medium">Tu futuro académico comienza aquí</p>
                     </div>
                 </div>
+                <div class="animate__animated animate__fadeInRight">
+                    <button onclick="window.location.href='../index.html'" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+                    </button>
+                </div>
+            </div>
+                </div>
                 <a href="../index.html" class="hidden sm:flex items-center space-x-2 px-6 py-3 bg-white border-2 border-purple-200 text-purple-600 rounded-xl hover:bg-purple-50 transition-all font-semibold shadow-md hover:shadow-lg">
                     <span>🔐</span>
                     <span>Iniciar Sesión</span>
@@ -240,7 +247,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <span class="mr-2">✏️</span> Nombre Completo *
                             </label>
-                            <input type="text" id="fullName" required
+                            <input type="text" id="fullName" name="fullName"
                                    class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
                                    placeholder="Ej: Juan Pérez García">
                         </div>
@@ -249,7 +256,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <span class="mr-2">🆔</span> Documento de Identidad *
                             </label>
-                            <input type="text" id="document" required
+                            <input type="text" id="document" name="document"
                                    class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
                                    placeholder="Ej: 1234567890">
                         </div>
@@ -258,7 +265,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <span class="mr-2">📧</span> Correo Electrónico *
                             </label>
-                            <input type="email" id="email" required
+                            <input type="email" id="email" name="email"
                                    class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
                                    placeholder="estudiante@email.com">
                         </div>
@@ -267,7 +274,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <span class="mr-2">📱</span> Teléfono *
                             </label>
-                            <input type="tel" id="phone" required
+                            <input type="tel" id="phone" name="phone"
                                    class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
                                    placeholder="Ej: 3001234567">
                         </div>
@@ -276,7 +283,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <span class="mr-2">🎂</span> Fecha de Nacimiento *
                             </label>
-                            <input type="date" id="birthdate" required
+                            <input type="date" id="birthdate" name="birthdate"
                                    class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none">
                         </div>
                         
@@ -284,7 +291,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <span class="mr-2">👥</span> Género *
                             </label>
-                            <select id="gender" required
+                            <select id="gender" name="gender"
                                     class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none">
                                 <option value="">Seleccionar...</option>
                                 <option value="M">Masculino</option>
@@ -298,7 +305,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                             <span class="mr-2">🏠</span> Dirección de Residencia *
                         </label>
-                        <input type="text" id="address" required
+                        <input type="text" id="address" name="address"
                                class="input-modern w-full px-4 py-4 border rounded-xl focus:outline-none"
                                placeholder="Ej: Calle 123 #45-67, Barrio Centro">
                     </div>
@@ -319,7 +326,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Colegio *</label>
-                            <select id="school" required
+                            <select id="school" name="school"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                                 <option value="">Seleccionar colegio...</option>
                             </select>
@@ -327,7 +334,7 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Grado *</label>
-                            <select id="grade" required
+                            <select id="grade" name="grade"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                                 <option value="">Seleccionar grado...</option>
                                 <option value="1">1° Primaria</option>
@@ -347,7 +354,7 @@
 
                     <div class="mt-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Acudiente *</label>
-                        <input type="text" id="guardianName" required
+                        <input type="text" id="guardianName" name="guardianName"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                placeholder="Ej: María García">
                     </div>
@@ -355,14 +362,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono del Acudiente *</label>
-                            <input type="tel" id="guardianPhone" required
+                            <input type="tel" id="guardianPhone" name="guardianPhone"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                    placeholder="Ej: 3001234567">
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Email del Acudiente</label>
-                            <input type="email" id="guardianEmail"
+                            <input type="email" id="guardianEmail" name="guardianEmail"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                    placeholder="acudiente@email.com">
                         </div>
@@ -421,7 +428,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago *</label>
-                                <select id="paymentMethod" required
+                                <select id="paymentMethod" name="paymentMethod"
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                                     <option value="">Seleccionar...</option>
                                     <option value="card">Tarjeta de Crédito/Débito</option>
@@ -462,7 +469,7 @@
                     
                     <div class="mb-6">
                         <label class="flex items-start space-x-3 cursor-pointer">
-                            <input type="checkbox" id="termsAccepted" required
+                            <input type="checkbox" id="termsAccepted" name="termsAccepted"
                                    class="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-sm text-gray-700">
                                 Acepto los <a href="#" class="text-purple-600 hover:underline">términos y condiciones</a> 
@@ -530,29 +537,30 @@
         let currentStep = 1;
 
         
-        function loadSchools() {
-            const schools = JSON.parse(localStorage.getItem('schools') || '[]');
+        async function loadSchools() {
             const select = document.getElementById('school');
-            
-            
-            select.innerHTML = '<option value="">Seleccionar colegio...</option>';
-            
-            schools.filter(s => s.status === 'active').forEach(school => {
-                const option = document.createElement('option');
-                option.value = school.id;
-                option.textContent = school.name;
-                select.appendChild(option);
-            });
+            select.innerHTML = '<option value="">Cargando colegios...</option>';
 
-            
-            if (schools.length === 0) {
-                const defaultSchools = [
-                    { id: 'sch1', name: 'Colegio San José', city: 'Bogotá', status: 'active' },
-                    { id: 'sch2', name: 'Institución Educativa La Esperanza', city: 'Medellín', status: 'active' },
-                    { id: 'sch3', name: 'Colegio Americano', city: 'Cali', status: 'active' }
-                ];
-                localStorage.setItem('schools', JSON.stringify(defaultSchools));
-                loadSchools(); 
+            try {
+                const res = await fetch('http://localhost:4000/api/schools');
+                if (!res.ok) throw new Error('No se pudo obtener colegios');
+                const schools = await res.json();
+                select.innerHTML = '<option value="">Seleccionar colegio...</option>';
+                schools.filter(s => s.status === 'active').forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school.id;
+                    option.textContent = school.name;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error(err);
+                select.innerHTML = '<option value="">Seleccionar colegio (demo)...</option>';
+                ['Colegio San José','Institución Educativa La Esperanza','Colegio Americano'].forEach((name, idx) => {
+                    const option = document.createElement('option');
+                    option.value = `demo-${idx}`;
+                    option.textContent = name;
+                    select.appendChild(option);
+                });
             }
         }
 
@@ -676,7 +684,7 @@
         });
 
         
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             if (!validateStep(3)) {
@@ -689,8 +697,9 @@
             }
 
             
+            const paymentMethod = document.getElementById('paymentMethod').value.toUpperCase();
+
             const formData = {
-                id: 'REG-' + Date.now(),
                 fullName: document.getElementById('fullName').value,
                 document: document.getElementById('document').value,
                 email: document.getElementById('email').value,
@@ -698,29 +707,54 @@
                 birthdate: document.getElementById('birthdate').value,
                 gender: document.getElementById('gender').value,
                 address: document.getElementById('address').value,
-                schoolId: document.getElementById('school').value,
-                schoolName: document.getElementById('school').options[document.getElementById('school').selectedIndex].text,
-                grade: document.getElementById('grade').value,
+                schoolId: document.getElementById('school').value || null,
+                grade: Number(document.getElementById('grade').value),
                 gradeName: document.getElementById('grade').options[document.getElementById('grade').selectedIndex].text,
                 guardianName: document.getElementById('guardianName').value,
                 guardianPhone: document.getElementById('guardianPhone').value,
                 guardianEmail: document.getElementById('guardianEmail').value,
-                paymentMethod: document.getElementById('paymentMethod').value,
-                amount: 150000,
-                status: 'pending', 
-                registrationDate: new Date().toISOString(),
-                approvedBy: null,
-                approvedDate: null
+                paymentMethod,
+                amount: 150000
             };
 
-            
-            const registrations = JSON.parse(localStorage.getItem('studentRegistrations') || '[]');
-            registrations.push(formData);
-            localStorage.setItem('studentRegistrations', JSON.stringify(registrations));
+            try {
+                console.log('Enviando datos:', formData);
+                const res = await fetch('http://localhost:4000/api/registrations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
 
-            
-            document.getElementById('registrationId').textContent = formData.id;
-            document.getElementById('successModal').classList.remove('hidden');
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({ message: 'Error desconocido' }));
+                    console.error('Error del servidor:', errorData);
+                    throw new Error(errorData.message || 'No se pudo registrar');
+                }
+
+                const registration = await res.json();
+                document.getElementById('registrationId').textContent = registration.id;
+
+                try {
+                    const payRes = await fetch('http://localhost:4000/api/payments/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ registrationId: registration.id, method: paymentMethod })
+                    });
+                    if (payRes.ok) {
+                        const payData = await payRes.json();
+                        if (payData.checkoutUrl) {
+                            window.open(payData.checkoutUrl, '_blank');
+                        }
+                    }
+                } catch (err) {
+                    console.warn('No se pudo iniciar checkout, revisa llaves de pago', err);
+                }
+
+                document.getElementById('successModal').classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                alert('Hubo un error guardando tu registro. Intenta de nuevo.');
+            }
         });
 
         

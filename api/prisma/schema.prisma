@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum PaymentMethod {
+  CARD
+  PSE
+  TRANSFER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  role         Role     @default(STUDENT)
+  schoolId     String?
+  school       School?  @relation(fields: [schoolId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  registrations Registration[]
+  assignments    Assignment[]       @relation("TeacherAssignments")
+  assignmentLinks AssignmentStudent[]
+}
+
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  address   String?
+  phone     String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  registrations Registration[]
+}
+
+model Registration {
+  id             String             @id @default(cuid())
+  fullName       String
+  document       String
+  email          String
+  phone          String
+  birthdate      DateTime?
+  gender         String?
+  address        String?
+  grade          Int
+  gradeName      String
+  guardianName   String
+  guardianPhone  String
+  guardianEmail  String?
+  paymentMethod  PaymentMethod
+  amount         Int
+  status         RegistrationStatus @default(PENDING)
+  paymentStatus  PaymentStatus      @default(PENDING)
+  schoolId       String?
+  school         School?            @relation(fields: [schoolId], references: [id])
+  userId         String?
+  user           User?              @relation(fields: [userId], references: [id])
+  approvedBy     String?
+  approvedAt     DateTime?
+  rejectedAt     DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  payments Payment[]
+}
+
+model Assignment {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  teacherId   String
+  teacher     User      @relation("TeacherAssignments", fields: [teacherId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  students AssignmentStudent[]
+}
+
+model AssignmentStudent {
+  id            String      @id @default(cuid())
+  assignmentId  String
+  studentId     String
+  status        String      @default("pending")
+  submittedAt   DateTime?
+  grade         Float?
+  assignment    Assignment  @relation(fields: [assignmentId], references: [id])
+  student       User        @relation(fields: [studentId], references: [id])
+}
+
+model Payment {
+  id             String         @id @default(cuid())
+  registrationId String
+  provider       String
+  providerRef    String?
+  amount         Int
+  currency       String @default("COP")
+  status         PaymentStatus @default(PENDING)
+  method         PaymentMethod
+  rawPayload     Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  registration Registration @relation(fields: [registrationId], references: [id])
+}

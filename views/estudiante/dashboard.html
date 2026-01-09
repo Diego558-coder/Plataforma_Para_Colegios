@@ -493,15 +493,46 @@ if (!currentUser) {
   throw new Error('No hay usuario logueado');
 }
 
-if (currentUser.role === 'teacher') {
+if ((currentUser.role || '').toUpperCase() === 'TEACHER') {
   window.location.href = '../docente/dashboard.html';
   throw new Error('Los docentes deben usar su panel');
+}
+
+const API_BASE = 'http://localhost:4000/api';
+async function apiFetch(path, options = {}) {
+  const headers = options.headers || {};
+  if (currentUser?.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+  headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  if (res.status === 204) return null;
+  const ct = res.headers.get('content-type') || '';
+  return ct.includes('application/json') ? res.json() : null;
+}
+
+// Limpia contenido demo para dejar solo datos reales en estudiante
+function removeDemoContentStudent() {
+  const main = document.getElementById('main') || document.body;
+  if (!main) return;
+  const demoSelectors = ['section', 'div.card', 'div.demo', 'ul.demo-list'];
+  const demoKeywords = ['Demo', 'Ejemplo', 'Muestra', 'Clases en vivo', 'Progreso total', 'Lecciones', 'Tareas'];
+  const nodes = main.querySelectorAll(demoSelectors.join(','));
+  nodes.forEach(n => {
+    const text = (n.textContent || '').trim();
+    if (demoKeywords.some(k => text.includes(k))) {
+      n.remove();
+    }
+  });
 }
 
  
 const urlParams = new URLSearchParams(window.location.search);
 const gradeFromURL = parseInt(urlParams.get('grade'));
 const studentGrade = gradeFromURL || currentUser.grade || 6;
+
+document.addEventListener('DOMContentLoaded', function(){
+  try { removeDemoContentStudent(); } catch {}
+});
 
  
 const gradeConfig = {
@@ -922,6 +953,43 @@ const state = {
   })(),
 };
 
+async function hydrateFromApi() {
+  if (!currentUser?.token) return;
+  try {
+    const [profile, registration, assignments] = await Promise.all([
+      apiFetch('/profile/me'),
+      apiFetch('/profile/student/registration'),
+      apiFetch('/profile/student/assignments')
+    ]);
+
+    if (profile?.name) {
+      state.student.name = profile.name;
+    }
+
+    if (registration) {
+      const g = registration.grade || state.student.grade;
+      if (gradeConfig[g]) {
+        state.student.grade = g;
+        state.student.gradeName = gradeConfig[g].name;
+        state.student.level = gradeConfig[g].level;
+      }
+    }
+
+    if (Array.isArray(assignments)) {
+      state.tasks = assignments.map((a) => ({
+        id: a.id,
+        kind: 'TAREA',
+        dueIn: a.dueDate ? formatDueIn(a.dueDate) : 'Próximamente',
+        title: a.title || 'Asignación',
+        desc: a.teacher ? `Docente: ${a.teacher.name}` : 'Asignación asignada',
+        status: (a.status || 'pendiente').toLowerCase().includes('submit') ? 'enviado' : a.status || 'pendiente'
+      }));
+    }
+  } catch (err) {
+    console.warn('No se pudo hidratar datos desde API', err);
+  }
+}
+
  
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const fmt2=n=>n.toString().padStart(2,'0');
@@ -933,6 +1001,15 @@ function toast(msg,type='default'){
 function fmtRange(start, end){
   const opts = { hour:'2-digit', minute:'2-digit' };
   return `${start.toLocaleTimeString('es-CO',opts)} – ${end.toLocaleTimeString('es-CO',opts)} (GMT-5)`;
+}
+function formatDueIn(dateStr){
+  try {
+    const due = new Date(dateStr).getTime();
+    const diffDays = Math.round((due - Date.now()) / (1000*60*60*24));
+    if (diffDays <= 0) return 'Hoy';
+    if (diffDays === 1) return 'Mañana';
+    return `En ${diffDays} días`;
+  } catch (_) { return 'Próximamente'; }
 }
 function nextJoinableIndex(){
   const now = Date.now();
@@ -1533,8 +1610,8 @@ function initHeader() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await hydrateFromApi();
   initHeader();
   
   

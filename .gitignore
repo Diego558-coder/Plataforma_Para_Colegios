@@ -1,0 +1,115 @@
+# Dependencias
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+*.js.map
+*.d.ts
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+
+# Temporal
+tmp/
+temp/
+*.tmp
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Editor backup files
+*.swp
+*.swo
+*~
+.#*
+
+# Prisma
+.prisma/
+
+# Cache
+.cache/
+.eslintcache
+
+# Uploads
+/uploads/
+/public/uploads/
+
+# Sistema operativo
+*.exe
+*.com
+*.bat
+*.cmd
+*.sh~
+
+# Node-gyp
+binding.gyp
+.node-gyp
+
+# IDE settings
+jsconfig.json
+.prettierrc
+
+# Sistemas de control de versiones
+.git/
+.gitmodules
+.gitattributes
+
+# Archivos de configuración privada
+config.local.js
+config.*.js
+!config/config.js
+
+# Archivos de prueba
+test-results/
+.mocha/
+
+# Session files
+session/
+sessions/
+
+# SSL certificates
+*.pem
+*.key
+*.cert
+*.crt

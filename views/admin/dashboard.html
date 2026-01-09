@@ -340,5 +340,90 @@
     </div>
 
     <script src="../../scripts/admin.js"></script>
+    <script>
+        // Eliminar contenido demo en admin para dejar solo datos reales del API
+        function removeDemoContentAdmin() {
+            const main = document.querySelector('main') || document.body;
+            if (!main) return;
+            const demoSelectors = ['section', 'div.bg-white.rounded-xl.shadow-sm', 'div.card', 'ul.demo-list'];
+            const demoKeywords = ['Pendientes', 'Estudiantes activos', 'Docentes activos', 'Colegios registrados', 'Resumen', 'Demo', 'Ejemplo'];
+            const nodes = main.querySelectorAll(demoSelectors.join(','));
+            nodes.forEach(n => {
+                const text = (n.textContent || '').trim();
+                if (demoKeywords.some(k => text.includes(k))) {
+                    n.remove();
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            try { removeDemoContentAdmin(); } catch {}
+
+            // Bloque de aprobación de contenidos globales
+            const main = document.querySelector('main');
+            if (main) {
+                const box = document.createElement('section');
+                box.className = 'p-8';
+                box.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-900">Contenidos pendientes de aprobación (Global)</h3>
+                            <button id="btnRefreshApprovals" class="px-3 py-2 text-sm rounded bg-blue-600 text-white">Actualizar</button>
+                        </div>
+                        <div id="approvalsList" class="divide-y"></div>
+                    </div>`;
+                main.appendChild(box);
+
+                async function fetchApprovals() {
+                    try {
+                        // usa admin.js apiFetch si está disponible
+                        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (currentUser?.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+                        const res = await fetch('http://localhost:4000/api/contents?scope=global&status=pendingApproval', { headers });
+                        if (!res.ok) throw new Error('API ' + res.status);
+                        return res.json();
+                    } catch (e) { return []; }
+                }
+
+                async function renderApprovals() {
+                    const list = await fetchApprovals();
+                    const el = document.getElementById('approvalsList');
+                    if (!list?.length) { el.innerHTML = '<p class="text-sm text-gray-500">Sin pendientes.</p>'; return; }
+                    el.innerHTML = list.map(item => `
+                        <div class="py-3 flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold">${item.title}</p>
+                                <p class="text-xs text-gray-500">${item.description || ''}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button data-id="${item.id}" class="btnApprove px-3 py-1 rounded bg-green-600 text-white">Aprobar</button>
+                                <button data-id="${item.id}" class="btnReject px-3 py-1 rounded bg-red-600 text-white">Rechazar</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    el.querySelectorAll('.btnApprove').forEach(b => b.addEventListener('click', async () => {
+                        const id = b.getAttribute('data-id');
+                        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (currentUser?.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+                        await fetch(`http://localhost:4000/api/contents/${id}/approve`, { method: 'POST', headers });
+                        await renderApprovals();
+                    }));
+                    el.querySelectorAll('.btnReject').forEach(b => b.addEventListener('click', async () => {
+                        const id = b.getAttribute('data-id');
+                        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (currentUser?.token) headers['Authorization'] = `Bearer ${currentUser.token}`;
+                        await fetch(`http://localhost:4000/api/contents/${id}/reject`, { method: 'POST', headers });
+                        await renderApprovals();
+                    }));
+                }
+
+                document.getElementById('btnRefreshApprovals')?.addEventListener('click', renderApprovals);
+                renderApprovals();
+            }
+        });
+    </script>
 </body>
 </html>

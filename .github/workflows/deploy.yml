@@ -1,0 +1,73 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: api/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./api
+      run: npm ci
+    
+    - name: Generate Prisma Client
+      working-directory: ./api
+      run: npx prisma generate
+    
+    - name: Build
+      working-directory: ./api
+      run: npm run build
+    
+    - name: Run Migrations
+      working-directory: ./api
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: npx prisma migrate deploy
+    
+    # Opción 1: Deploy a Azure App Service
+    - name: Deploy to Azure
+      if: ${{ secrets.AZURE_WEBAPP_NAME }}
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./api
+    
+    # Opción 2: Deploy vía SSH
+    - name: Deploy via SSH
+      if: ${{ secrets.SSH_HOST }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/www/plataforma
+          git pull origin main
+          cd api
+          npm install
+          npx prisma generate
+          npx prisma migrate deploy
+          npm run build
+          pm2 restart plataforma-api
+    
+    # Opción 3: Build Docker y push a registry
+    - name: Build Docker Image
+      if: ${{ secrets.DOCKER_REGISTRY }}
+      run: |
+        docker build -t ${{ secrets.DOCKER_REGISTRY }}/plataforma-api:latest ./api
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login ${{ secrets.DOCKER_REGISTRY }} -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker push ${{ secrets.DOCKER_REGISTRY }}/plataforma-api:latest
