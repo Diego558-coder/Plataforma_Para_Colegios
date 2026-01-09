@@ -1,360 +1,223 @@
-# 🎓 Plataforma Escolar
+# Plataforma Escolar
 
-Una plataforma educativa completa y moderna para la gestión integral de instituciones educativas. Con características avanzadas como tareas, calificaciones, conferencias de video, chat en tiempo real y gamificación.
+Una plataforma educativa para la gestión integral de instituciones educativas. Incluye gestión de estudiantes, docentes, tareas, calificaciones, pagos y más.
 
----
-
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 - [Características](#características)
-- [Requisitos Previos](#requisitos-previos)
+- [Requisitos](#requisitos)
 - [Instalación](#instalación)
 - [Configuración](#configuración)
 - [Uso](#uso)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Tecnologías](#tecnologías)
-- [API REST](#api-rest)
+- [Estructura](#estructura)
+- [Stack Tecnológico](#stack-tecnológico)
+- [API](#api)
 - [Contribuir](#contribuir)
 - [Licencia](#licencia)
 
----
-
-## ✨ Características
+## Características
 
 ### Para Estudiantes
-- 📚 Acceso a contenido educativo
-- ✅ Envío y seguimiento de tareas
-- 📊 Visualización de calificaciones en tiempo real
-- 💬 Chat con compañeros y docentes
-- 🎮 Sistema de gamificación con insignias y niveles
-- 📹 Acceso a conferencias de video en vivo
+- Acceso a contenido educativo
+- Envío y seguimiento de tareas
+- Ver calificaciones
+- Chat con docentes y compañeros
+- Sistema de logros y niveles
+- Acceso a conferencias de video
 
 ### Para Docentes
-- 👥 Gestión completa de estudiantes
-- 📝 Creación y publicación de contenido
-- ✏️ Calificación y retroalimentación
-- 📊 Análisis de desempeño estudiantil
-- 📅 Programación de clases y conferencias
-- 💬 Comunicación directa con estudiantes
+- Gestionar estudiantes
+- Crear y publicar contenido
+- Calificar tareas
+- Reportes de desempeño
+- Programar clases
+- Comunicación directa con estudiantes
 
 ### Para Administradores
-- 🏫 Gestión de escuelas e instituciones
-- 👤 Administración de usuarios y roles
-- 🔐 Control de permisos y seguridad
-- 💳 Gestión de pagos integrada
-- 📈 Reportes y analytics
-- ⚙️ Configuración del sistema
+- Gestionar escuelas e instituciones
+- Administración de usuarios y roles
+- Control de permisos y seguridad
+- Gestión de pagos integrada
+- Reportes y analytics
+- Configuración del sistema
 
-### Características Generales
-- 🎨 Interfaz intuitiva y responsiva
-- 🌍 Soporte multiidioma (español)
-- 🔔 Notificaciones en tiempo real
-- 📱 Diseño mobile-first
-- 🐍 Entorno Python integrado (Pyodide)
-- 🧮 Playground de código interactivo
+## Requisitos
 
----
+Para usar el proyecto necesitas:
 
-## 🔧 Requisitos Previos
+- Node.js v18 o superior
+- npm o yarn
+- Docker (opcional)
+- PostgreSQL
+- Python 3.8+ para desarrollo
 
-Antes de comenzar, asegúrate de tener instalado:
+## Instalación
 
-- **Node.js** (v18 o superior)
-- **npm** o **yarn**
-- **Docker** (opcional, pero recomendado)
-- **PostgreSQL** (si no usas Docker)
-- **Python** 3.8+ (para desarrollo)
-
----
-
-## 📦 Instalación
-
-### Opción 1: Con Docker (Recomendado)
+### Con Docker
 
 ```bash
-# Clonar el repositorio
 git clone https://github.com/Diego558-coder/plataforma-escolar.git
 cd plataforma-escolar
-
-# Ejecutar con Docker Compose
 docker-compose up -d
-
-# Inicializar base de datos
 docker exec plataforma-escolar-api npm run prisma:seed
 ```
 
-### Opción 2: Instalación Local
+### Instalación Manual
 
 ```bash
-# Clonar repositorio
 git clone https://github.com/Diego558-coder/plataforma-escolar.git
 cd plataforma-escolar
-
-# Instalar dependencias del API
 cd api
 npm install
 
-# Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus configuraciones
+# Edita .env con tus valores
 
-# Ejecutar migraciones
 npm run prisma:migrate
-
-# Inicializar datos de prueba
 npm run prisma:seed
-
-# Iniciar servidor en modo desarrollo
 npm run dev
 ```
 
----
+## Configuración
 
-## ⚙️ Configuración
-
-### Variables de Entorno
-
-Crea un archivo `.env` en la carpeta `/api`:
+Copia el archivo `.env.example` a `.env` en la carpeta `/api` y configura:
 
 ```env
-# Base de datos
 DATABASE_URL=postgresql://user:password@localhost:5432/plataforma_escolar
-
-# JWT
-JWT_SECRET=tu-secreto-jwt-super-seguro
-JWT_EXPIRES_IN=7d
-
-# Stripe (Pagos)
+JWT_SECRET=tu-secreto-muy-seguro
 STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Email
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=tu-email@gmail.com
-SMTP_PASS=tu-contraseña
-
-# Server
 PORT=5000
 NODE_ENV=development
 ```
 
-### Configuración de la Aplicación
+## Uso
 
-Edita `config/config.js` para personalizar:
-
-- Nombre de la institución
-- Zona horaria y idioma
-- Colores del tema
-- Configuraciones de gamificación
-- Fechas del calendario académico
-
----
-
-## 🚀 Uso
-
-### Desarrollo
+Inicia el servidor en desarrollo:
 
 ```bash
-# En la carpeta /api
+cd api
 npm run dev
-
-# La API estará disponible en http://localhost:5000
 ```
 
-### Producción
+La API estará disponible en http://localhost:5000
+
+Para producción:
 
 ```bash
-# Compilar TypeScript
 npm run build
-
-# Iniciar servidor
 npm start
 ```
 
-### Acceso a la Plataforma
-
-- **URL**: http://localhost:3000
-- **Admin**: admin@plataforma.edu
-- **Docente**: teacher@plataforma.edu
-- **Estudiante**: student@plataforma.edu
-
----
-
-## 📁 Estructura del Proyecto
+## Estructura
 
 ```
 plataforma-escolar/
-├── api/                          # Backend API
+├── api/                    # Backend API
 │   ├── src/
-│   │   ├── app.ts               # Configuración de Express
-│   │   ├── server.ts            # Punto de entrada
-│   │   ├── config/              # Configuración
-│   │   ├── middlewares/         # Middlewares (auth, error handler)
-│   │   ├── routes/              # Rutas API
-│   │   └── utils/               # Utilidades
+│   │   ├── app.ts
+│   │   ├── server.ts
+│   │   ├── config/
+│   │   ├── middlewares/
+│   │   ├── routes/
+│   │   └── utils/
 │   ├── prisma/
-│   │   ├── schema.prisma        # Esquema de base de datos
-│   │   ├── migrations/          # Migraciones de BD
-│   │   └── seed.ts              # Datos iniciales
-│   └── package.json             # Dependencias
-│
-├── assets/                       # Recursos estáticos
-│   ├── css/                     # Estilos
-│   ├── images/                  # Imágenes
-│   ├── js/                      # Scripts frontend
-│   └── fonts/                   # Tipografías
-│
-├── components/                   # Componentes reutilizables
-├── config/                       # Configuración global
-├── public/                       # Archivos públicos
-├── scripts/                      # Scripts del sistema
-├── views/                        # Vistas HTML
-│   ├── admin/
-│   ├── docente/
-│   └── estudiante/
-│
-├── README.md                     # Este archivo
-├── docker-compose.yml           # Configuración Docker
-├── package.json                 # Dependencias frontend
-└── CHANGELOG.md                 # Historial de cambios
+│   └── package.json
+├── assets/                 # Recursos estáticos
+│   ├── css/
+│   ├── images/
+│   └── js/
+├── components/
+├── views/
+├── config/
+├── docker-compose.yml
+└── README.md
 ```
 
----
-
-## 🛠️ Tecnologías
+## Stack Tecnológico
 
 ### Backend
-- **Express.js** - Framework web
-- **TypeScript** - Lenguaje tipado
-- **Prisma** - ORM moderno
-- **PostgreSQL** - Base de datos
-- **JWT** - Autenticación
-- **Stripe** - Procesamiento de pagos
-- **Socket.io** - Comunicación en tiempo real
+- Node.js + Express
+- TypeScript
+- Prisma ORM
+- PostgreSQL
+- JWT para autenticación
+- Stripe para pagos
 
 ### Frontend
-- **HTML5 / CSS3** - Estructura y estilos
-- **JavaScript** - Interactividad
-- **Pyodide** - Entorno Python en navegador
-- **Responsive Design** - Compatible con móviles
+- HTML5 / CSS3
+- JavaScript
+- Pyodide (Python en navegador)
 
 ### DevOps
-- **Docker** - Containerización
-- **Docker Compose** - Orquestación
-- **Git** - Control de versiones
+- Docker
+- Docker Compose
 
----
+## API
 
-## 🔌 API REST
+Los endpoints principales incluyen:
 
-### Autenticación
-
-```bash
+Autenticación:
+```
 POST /api/auth/register
 POST /api/auth/login
-POST /api/auth/refresh-token
 POST /api/auth/logout
 ```
 
-### Usuarios
-
-```bash
-GET    /api/users
-GET    /api/users/:id
-PUT    /api/users/:id
-DELETE /api/users/:id
-GET    /api/profile
-PUT    /api/profile
+Usuarios:
+```
+GET /api/users
+GET /api/profile
+PUT /api/profile
 ```
 
-### Contenido Educativo
-
-```bash
-GET    /api/contents
-POST   /api/contents
-PUT    /api/contents/:id
+Contenido:
+```
+GET /api/contents
+POST /api/contents
+PUT /api/contents/:id
 DELETE /api/contents/:id
 ```
 
-### Tareas
-
-```bash
-GET    /api/tasks
-POST   /api/tasks
-PUT    /api/tasks/:id
-DELETE /api/tasks/:id
-POST   /api/tasks/:id/submit
+Tareas:
+```
+GET /api/tasks
+POST /api/tasks
+POST /api/tasks/:id/submit
 ```
 
-### Calificaciones
+Para más detalles, consulta [API_DOCS.md](./API_DOCS.md)
 
-```bash
-GET    /api/assignments
-POST   /api/assignments/:id/grade
-GET    /api/assignments/:id/grades
-```
+## Contribuir
 
-### Pagos
-
-```bash
-POST   /api/payments/create-intent
-POST   /api/payments/webhook
-GET    /api/payments/:id
-```
-
----
-
-## 📚 Documentación Adicional
-
-- [Guía de Pruebas Locales](./GUIA_PRUEBAS_LOCALES.md)
-- [Estado Local](./ESTADO_LOCAL.md)
-- [Historial de Cambios](./CHANGELOG.md)
-
----
-
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas. Para cambios importantes:
+Las contribuciones son bienvenidas. Por favor:
 
 1. Fork el repositorio
-2. Crea una rama para tu característica (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
+2. Crea una rama para tu feature: `git checkout -b feature/mi-feature`
+3. Commit tus cambios: `git commit -m 'Agregar feature'`
+4. Push a la rama: `git push origin feature/mi-feature`
 5. Abre un Pull Request
 
----
+Para más detalles, consulta [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-## 📄 Licencia
+## Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](./LICENSE) para más detalles.
+Este proyecto está bajo la Licencia MIT. Consulta [LICENSE](./LICENSE) para más detalles.
 
----
+## Autor
 
-## 👨‍💻 Autor
+Diego - Desarrollador Full Stack
 
-**Diego** - Desarrollador Full Stack
-- GitHub: [@Diego558-coder](https://github.com/Diego558-coder)
-- Email: diego@plataformaescolar.com
+GitHub: https://github.com/Diego558-coder
 
----
+## Soporte
 
-## 📞 Soporte
+Para soporte, abre un issue en GitHub o envía un email a support@plataformaescolar.com
 
-Para soporte, envía un email a `support@plataformaescolar.com` o abre un issue en GitHub.
+## Documentación Adicional
 
----
+- [Guía Rápida](./QUICKSTART.md)
+- [Arquitectura](./ARCHITECTURE.md)
+- [Despliegue](./DEPLOYMENT.md)
+- [Seguridad](./SECURITY.md)
+- [Documentación API](./API_DOCS.md)
 
-## 🗺️ Roadmap
-
-- [ ] Integración con Google Classroom
-- [ ] Sistema de reportes avanzados
-- [ ] App móvil nativa
-- [ ] Integración con Zoom
-- [ ] Sistema de reservación de recursos
-- [ ] Portal de padres
-- [ ] Integración con redes sociales educativas
-
----
-
-⭐ Si te gusta este proyecto, ¡no olvides dejar una estrella en GitHub!
